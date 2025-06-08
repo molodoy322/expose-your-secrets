@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getUserStats } from "./lib/contract";
 
@@ -36,15 +36,18 @@ interface HomeTabProps {
   boostLikes: (id: number) => void;
   setSecret: (s: string) => void;
   secrets: any[];
-   fetchSecrets: () => void;
   prevSecrets?: any[];
   loading: boolean;
   info: string;
   submitSecret: () => void;
   likeSecret: (id: number) => void;
   isAdmin: boolean;
-deleteSecret: (id: number) => void;
+  deleteSecret: (id: number) => void;
   cardStyle: React.CSSProperties;
+  fetchNextPage: () => void;
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
+  refetchSecrets: () => void;
 }
 
 // --- DiceBear аватар по адресу (детерміновано) ---
@@ -70,6 +73,23 @@ function getAnonNick(address: string | undefined) {
   return `${w1}${w2}${num}`;
 }
 
+// --- Кешування статистики користувача ---
+function getCachedStats(address: string) {
+  const raw = localStorage.getItem('stats_' + address);
+  if (!raw) return null;
+  try {
+    const { data, timestamp } = JSON.parse(raw);
+    if (Date.now() - timestamp < 5 * 60 * 1000) return data;
+    return null;
+  } catch { return null; }
+}
+function setCachedStats(address: string, data: {secretsPosted: number, likesGiven: number}) {
+  localStorage.setItem('stats_' + address, JSON.stringify({
+    data,
+    timestamp: Date.now()
+  }));
+}
+
 export default function HomeTab({
   address,
   isConnected,
@@ -80,14 +100,17 @@ export default function HomeTab({
   setSecret,
   secrets,
   prevSecrets = [],
-  fetchSecrets,
   loading,
   isAdmin,           // <-- додав!
   deleteSecret,      // <-- додав!
   submitSecret,
   likeSecret,
-   boostLikes,
+  boostLikes,
   cardStyle,
+  fetchNextPage,
+  hasNextPage,
+  isFetchingNextPage,
+  refetchSecrets,
 }: HomeTabProps) {
 
   // Додаєш тут
@@ -105,37 +128,53 @@ export default function HomeTab({
     // --- User stats state ---
 const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: number}>({ secretsPosted: 0, likesGiven: 0 });
 
-  const [isRefreshing, setIsRefreshing] = React.useState(false);
+  // Мемоизируем фильтрацию секретов
+  const latestSecrets = useMemo(() => 
+    secrets.filter(s => !s.deleted).slice(0, 10),
+    [secrets]
+  );
 
-  const handleRefresh = async () => {
+  const topSecrets = useMemo(() => 
+    [...secrets].filter(s => !s.deleted)
+      .sort((a, b) => Number(b.likes) - Number(a.likes))
+      .slice(0, 10),
+    [secrets]
+  );
 
-    setIsRefreshing(true);
-    await fetchSecrets();
-    setTimeout(() => setIsRefreshing(false), 420); // коротка пауза для анімації
-  };
+  // Мемоизируем функцию SecretCard
+  const SecretCardMemo = useCallback((s: any, isMine: boolean, isMotion = true) => {
+    return SecretCard(s, isMine, isMotion);
+  }, [likeSecret, boostLikes, deleteSecret, isAdmin]);
 
-
-React.useEffect(() => {
-  async function fetchStats() {
-    if (address) {
-      try {
-        const [secretsPosted, likesGiven] = await getUserStats(address) as [number, number];
-        setUserStats({ secretsPosted: Number(secretsPosted), likesGiven: Number(likesGiven) });
-      } catch (e) {
-        setUserStats({ secretsPosted: 0, likesGiven: 0 });
-      }
-    } else {
-      setUserStats({ secretsPosted: 0, likesGiven: 0 });
+  // Оптимизируем обработчик скролла
+  const handleIntersection = useCallback((entries: IntersectionObserverEntry[]) => {
+    if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+      setTimeout(() => {
+        fetchNextPage();
+      }, 300);
     }
-  }
-  fetchStats();
-}, [address]);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
+  useEffect(() => {
+    if (!hasNextPage || isFetchingNextPage) return;
+    
+    const options = {
+      root: null,
+      rootMargin: '200px',
+      threshold: 0.1
+    };
 
+    if (observer.current) observer.current.disconnect();
+    observer.current = new window.IntersectionObserver(handleIntersection, options);
 
-  const latestSecrets = secrets.filter(s => !s.deleted).slice(0, 10);
-const topSecrets = [...secrets].filter(s => !s.deleted).sort((a, b) => Number(b.likes) - Number(a.likes)).slice(0, 10);
+    if (lastSecretRef.current) {
+      observer.current.observe(lastSecretRef.current);
+    }
 
+    return () => { 
+      if (observer.current) observer.current.disconnect(); 
+    };
+  }, [hasNextPage, isFetchingNextPage, handleIntersection]);
 
   // ---- disabled логіка ----
   const submitDisabled = !isConnected || loading || !secret.trim();
@@ -168,86 +207,68 @@ const topSecrets = [...secrets].filter(s => !s.deleted).sort((a, b) => Number(b.
 
   // --- Секрет-картка: для Latest i Top ---
   function SecretCard(s: any, isMine: boolean, isMotion = true) {
-  const CardWrap = isMotion ? motion.li : "li";
-  return (
-    <CardWrap
-      key={s.id}
-      initial={isMotion && s.id === newSecretId ? { opacity: 0, scale: 0.88, filter: "blur(6px)" } : undefined}
-      animate={isMotion && s.id === newSecretId ? { opacity: 1, scale: 1, filter: "blur(0px)" } : undefined}
-      transition={isMotion ? { duration: 0.6, ease: [0.34, 1.56, 0.64, 1] } : undefined}
-      exit={isMotion ? { opacity: 0, scale: 0.8, filter: "blur(6px)" } : undefined}
-      style={{
-        ...cardStyle,
-        ...getMyStyle(isMine),
-        position: "relative",
-        zIndex: s.id === newSecretId ? 2 : 1,
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        minHeight: 180, // щоб лайк і лічильник були внизу навіть при короткому тексті
-      }}
-    >
-      {/* --- Аватар + нік у правому верхньому куті --- */}
-      <div style={{
-        position: "absolute",
-        top: 11,
-        right: 0,
-        display: "flex",
-        alignItems: "center",
-        gap: 10,
-        zIndex: 9,
-        background: "rgba(34,34,50,0.82)",
-        borderRadius: 8,
-        padding: "3.5px 12px 3.5px 6px",
-        boxShadow: "0 2px 10px #0002"
-      }}>
-        <img 
-          src={getAvatarUrl(s.author)} 
-          alt="avatar" 
-          style={{width:24,height:24,borderRadius:6,background:"#23243a",border:"2px solid #23243a"}}
-          loading="lazy"
-        />
-        <span style={{
-          fontWeight:700,
-          fontSize:16,
-          color:"#fff",
-          letterSpacing:0.3,
-          opacity:0.92,
-          whiteSpace:'nowrap'
+    return (
+      <>
+        {/* --- Аватар + нік у правому верхньому куті --- */}
+        <div style={{
+          position: "absolute",
+          top: 11,
+          right: 0,
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          zIndex: 9,
+          background: "rgba(34,34,50,0.82)",
+          borderRadius: 8,
+          padding: "3.5px 12px 3.5px 6px",
+          boxShadow: "0 2px 10px #0002"
         }}>
-          {getAnonNick(s.author)}
-        </span>
-      </div>
-      {/* --- Єдиноріг тільки для своїх секретів --- */}
-      {isMine && (
-        <motion.span
-          initial={{ scale: 0.6, rotate: -10, filter: "blur(2px)" }}
-          animate={{ scale: 1.15, rotate: [10, -10, 10], filter: "blur(0px)" }}
-          transition={{ repeat: Infinity, duration: 2.5, ease: "linear" }}
-          style={{
-            position: "absolute",
-            top: 10,
-            left: 16,
-            fontSize: 32,
-            filter: "drop-shadow(0 0 9px #FFD600)",
-            pointerEvents: "none",
-            userSelect: "none"
-          }}
-          title="This is your secret"
-        >🦄</motion.span>
-      )}
-      {/* --- Сам секрет --- */}
-      <div style={{
-        fontStyle: "italic",
-        fontSize: 20,
-        marginBottom: 7,
-        marginTop: 28,
-        letterSpacing: "0.4px",
-        textAlign: "center"
-      }}>{s.text}</div>
-      {/* --- Like + лайки (завжди внизу) --- */}
-      <div style={{
+          <img 
+            src={getAvatarUrl(s.author)} 
+            alt="avatar" 
+            style={{width:24,height:24,borderRadius:6,background:"#23243a",border:"2px solid #23243a"}}
+            loading="lazy"
+          />
+          <span style={{
+            fontWeight:700,
+            fontSize:16,
+            color:"#fff",
+            letterSpacing:0.3,
+            opacity:0.92,
+            whiteSpace:'nowrap'
+          }}>
+            {getAnonNick(s.author)}
+          </span>
+        </div>
+        {/* --- Єдиноріг тільки для своїх секретів --- */}
+        {isMine && (
+          <motion.span
+            initial={{ scale: 0.6, rotate: -10, filter: "blur(2px)" }}
+            animate={{ scale: 1.15, rotate: [10, -10, 10], filter: "blur(0px)" }}
+            transition={{ repeat: Infinity, duration: 2.5, ease: "linear" }}
+            style={{
+              position: "absolute",
+              top: 10,
+              left: 16,
+              fontSize: 32,
+              filter: "drop-shadow(0 0 9px #FFD600)",
+              pointerEvents: "none",
+              userSelect: "none"
+            }}
+            title="This is your secret"
+          >🦄</motion.span>
+        )}
+        {/* --- Сам секрет --- */}
+        <div style={{
+          fontStyle: "italic",
+          fontSize: 20,
+          marginBottom: 7,
+          marginTop: 28,
+          letterSpacing: "0.4px",
+          textAlign: "center"
+        }}>{s.text}</div>
+        {/* --- Like + лайки (завжди внизу) --- */}
+        <div style={{
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
@@ -333,10 +354,22 @@ const topSecrets = [...secrets].filter(s => !s.deleted).sort((a, b) => Number(b.
           </button>
         )}
       </div>
-    </CardWrap>
-  );
-}
+      </>
+    );
+  }
 
+  // --- Стан для спіннера refresh ---
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  async function handleRefresh() {
+    setIsRefreshing(true);
+    await refetchSecrets();
+    setTimeout(() => setIsRefreshing(false), 600); // невелика затримка для UX
+  }
+
+  // --- Infinite scroll refs ---
+  const observer = useRef<IntersectionObserver | null>(null);
+  const lastSecretRef = useRef<HTMLLIElement | null>(null);
 
   return (
     <>
@@ -492,66 +525,12 @@ const topSecrets = [...secrets].filter(s => !s.deleted).sort((a, b) => Number(b.
         borderRadius: 6
       }} />
 
-      <button
-  onClick={handleRefresh}
-  disabled={isRefreshing}
-  style={{
-    margin: "0 auto 0 auto",
-    display: "block",
-    padding: "12px 32px",
-    background: "#23243a",
-    color: "#e4e6ef",
-    border: isRefreshing ? "2px solid #9056FF" : "2px solid #21EF6E",
-    borderRadius: 14,
-    fontWeight: 700,
-    fontSize: 18,
-    boxShadow: isRefreshing ? "0 0 16px #9056FF33" : "0 2px 14px #21ef6e22",
-    cursor: isRefreshing ? "wait" : "pointer",
-    letterSpacing: 1.1,
-    transition: "box-shadow 0.19s, border 0.15s, color 0.17s, background 0.22s",
-    filter: isRefreshing ? "brightness(0.92)" : "none",
-    opacity: isRefreshing ? 0.7 : 1,
-    minWidth: 175,
-    position: "relative"
-  }}
->
-  <span
-    style={{
-      display: "inline-block",
-      marginRight: 10,
-      verticalAlign: "middle",
-      animation: isRefreshing ? "spin360 0.7s linear infinite" : "none",
-      color: isRefreshing ? "#9056FF" : "#21EF6E",
-      fontSize: 22,
-      transition: "color 0.16s"
-    }}
-  >🌀</span>
-  <span style={{
-    fontWeight: 800,
-    letterSpacing: 0.5,
-    color: isRefreshing ? "#9056FF" : "#21EF6E",
-    textShadow: isRefreshing ? "0 0 6px #9056FF55" : "none",
-    transition: "color 0.16s"
-  }}>
-    REFRESH SECRETS
-  </span>
-  <style>
-    {`
-      @keyframes spin360 {
-        0% { transform: rotate(0deg);}
-        100% {transform: rotate(360deg);}
-      }
-    `}
-  </style>
-</button>
-
-
       {/* --- Дві колонки + розділювач --- */}
-      <div style={{ display: "flex", justifyContent: "center", gap: 40 }}>
+      <div style={{ display: "flex", justifyContent: "center", gap: 120, alignItems: "flex-start", position: "relative" }}>
         {/* Latest */}
-        <div style={{ flex: 1, minWidth: 340 }}>
+        <div style={{ flex: 1, minWidth: 340, marginRight: 40 }}>
           <h2 style={{
-              marginTop: -55,
+            marginTop: -10,
             fontSize: "2.1rem",
             marginBottom: 10,
             background: "linear-gradient(90deg, #21EF6E 0%, #FF2D55 100%)",
@@ -565,28 +544,137 @@ const topSecrets = [...secrets].filter(s => !s.deleted).sort((a, b) => Number(b.
               <li style={{ color: "#888", fontStyle: "italic" }}>No secrets yet. Be the first!</li>
             )}
             <AnimatePresence>
-              {latestSecrets.map(s => {
+              {latestSecrets.map((s, idx) => {
                 const isMine = s.author?.toLowerCase() === address?.toLowerCase();
-                return SecretCard(s, isMine, true);
+                const ref = idx === latestSecrets.length - 1 ? lastSecretRef : undefined;
+                return (
+                  <motion.li
+                    ref={ref}
+                    key={s.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
+                    style={{
+                      ...cardStyle,
+                      ...getMyStyle(isMine),
+                      position: "relative",
+                      zIndex: 1,
+                      overflow: "hidden",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                      minHeight: 180,
+                    }}
+                  >
+                    {SecretCardMemo(s, isMine, true)}
+                  </motion.li>
+                );
               })}
             </AnimatePresence>
           </ul>
+          {isFetchingNextPage && (
+            <div style={{ 
+              color: '#21EF6E', 
+              margin: 12,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8
+            }}>
+              <span style={{ animation: 'spin360 1s linear infinite' }}>🔄</span>
+              Loading more secrets...
+            </div>
+          )}
+        </div>
+
+        {/* REFRESH BUTTON по центру над лінією */}
+        <div style={{ position: "absolute", left: "50%", top: -20, transform: "translateX(-50%)", zIndex: 10 }}>
+          <button
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            style={{
+              padding: "12px 32px",
+              background: "#23243a",
+              color: "#e4e6ef",
+              border: isRefreshing ? "2px solid #9056FF" : "2px solid #21EF6E",
+              borderRadius: 14,
+              fontWeight: 700,
+              fontSize: 18,
+              boxShadow: isRefreshing ? "0 0 16px #9056FF33" : "0 2px 14px #21ef6e22",
+              cursor: isRefreshing ? "wait" : "pointer",
+              letterSpacing: 1.1,
+              minWidth: 175,
+              position: "relative",
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              filter: isRefreshing ? "brightness(0.92)" : "none",
+              justifyContent: "center",
+            }}
+          >
+            <span
+              style={{
+                display: "inline-block",
+                verticalAlign: "middle",
+                animation: isRefreshing ? "spin360 0.7s linear infinite" : "none",
+                color: isRefreshing ? "#9056FF" : "#21EF6E",
+                fontSize: 22,
+                transition: "color 0.16s"
+              }}
+            >🔄</span>
+            <span style={{
+              fontWeight: 800,
+              letterSpacing: 0.5,
+              color: isRefreshing ? "#9056FF" : "#21EF6E",
+              textShadow: isRefreshing ? "0 0 6px #9056FF55" : "none",
+              transition: "color 0.16s"
+            }}>
+              {isRefreshing ? "Refreshing..." : "REFRESH SECRETS"}
+            </span>
+          </button>
+          <style>
+            {`
+              @keyframes spin360 {
+                0% { transform: rotate(0deg);}
+                100% {transform: rotate(360deg);}
+              }
+            `}
+          </style>
         </div>
 
         {/* Divider */}
-        <div style={{
-          width: 4,
-          minHeight: 420,
-          background: "linear-gradient(180deg, #21EF6E 0%, #FF2D55 100%)",
-          borderRadius: 12,
-          margin: "0 20px",
-          opacity: 0.93
-        }} />
+        <div
+          style={{
+            width: 7,
+            height: '100%',
+            minHeight: 420,
+            position: 'absolute',
+            left: '50%',
+            top: 0,
+            transform: 'translateX(-50%)',
+            borderRadius: 16,
+            opacity: 0.9,
+            zIndex: 2,
+            background: 'linear-gradient(180deg, #21EF6E, #FFD600, #FF2D55, #9056FF, #21EF6E)',
+            backgroundSize: '100% 400%',
+            animation: 'rgb-divider-move 4s linear infinite',
+            boxShadow: '0 0 18px 4px #21EF6E33, 0 0 18px 8px #FF2D5533',
+          }}
+        />
+        <style>
+          {`
+            @keyframes rgb-divider-move {
+              0% { background-position: 0% 0%; }
+              100% { background-position: 0% 100%; }
+            }
+          `}
+        </style>
 
         {/* Top */}
-        <div style={{ flex: 1, minWidth: 340 }}>
+        <div style={{ flex: 1, minWidth: 340, marginLeft: 40 }}>
           <h2 style={{
-                marginTop: -55,
+                marginTop: -10,
 
             fontSize: "2.1rem",
             marginBottom: 10,
@@ -602,7 +690,24 @@ const topSecrets = [...secrets].filter(s => !s.deleted).sort((a, b) => Number(b.
             )}
             {topSecrets.map(s => {
               const isMine = s.author?.toLowerCase() === address?.toLowerCase();
-              return SecretCard(s, isMine, false);
+              return (
+                <li
+                  key={s.id}
+                  style={{
+                    ...cardStyle,
+                    ...getMyStyle(isMine),
+                    position: "relative",
+                    zIndex: 1,
+                    overflow: "hidden",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    minHeight: 180,
+                  }}
+                >
+                  {SecretCardMemo(s, isMine, false)}
+                </li>
+              );
             })}
           </ul>
         </div>

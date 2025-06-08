@@ -1,1 +1,18 @@
-{}
+{
+  "name": "Expose Your Secrets",
+  "description": "Share your secrets anonymously on Base",
+  "image": "https://expose-your-secrets.vercel.app/og.png",
+  "external_url": "https://expose-your-secrets.vercel.app",
+  "frame": {
+    "version": "next",
+    "imageUrl": "https://expose-your-secrets.vercel.app/og.png",
+    "button": {
+      "title": "Open",
+      "action": {
+        "type": "launch_frame",
+        "name": "Expose Your Secrets",
+        "url": "https://expose-your-secrets.vercel.app"
+      }
+    }
+  }
+}

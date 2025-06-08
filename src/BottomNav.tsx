@@ -1,5 +1,3 @@
-
-
 function TabButton({ icon, text, active, onClick, badge }: { icon: string, text: string, active: boolean, onClick: () => void, badge?: boolean }) {
   return (
     <button
@@ -57,8 +55,8 @@ function TabButton({ icon, text, active, onClick, badge }: { icon: string, text:
 }
 
 interface BottomNavProps {
-  activeTab: "home" | "profile" | "gm";
-  setActiveTab: (tab: "home" | "profile" | "gm") => void;
+  activeTab: "home" | "profile" | "gm" | "achievements" | "help";
+  setActiveTab: (tab: "home" | "profile" | "gm" | "achievements" | "help") => void;
   hasNewProfile: boolean;
 }
 
@@ -81,6 +79,12 @@ export default function BottomNav({ activeTab, setActiveTab, hasNewProfile }: Bo
       boxShadow: "0 0 22px 0 #21ef6e44"
     }}>
       <TabButton
+        icon="🏆"
+        text="Achievements"
+        active={activeTab === "achievements"}
+        onClick={() => setActiveTab("achievements")}
+      />
+      <TabButton
         icon="🤝"
         text="GM"
         active={activeTab === "gm"}
@@ -98,6 +102,12 @@ export default function BottomNav({ activeTab, setActiveTab, hasNewProfile }: Bo
         active={activeTab === "profile"}
         onClick={() => setActiveTab("profile")}
         badge={hasNewProfile}
+      />
+      <TabButton
+        icon="❓"
+        text="Help"
+        active={activeTab === "help"}
+        onClick={() => setActiveTab("help")}
       />
     </div>
   );
