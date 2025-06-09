@@ -310,10 +310,6 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
 
   return (
     <div className="flex flex-col items-center w-full max-w-[420px] mx-auto px-4" style={{ gap: "16px" }}>
-      <h1 className="text-3xl font-bold bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] bg-clip-text text-transparent">
-        🔥 Expose Your Secrets 🔥
-      </h1>
-
       {!isConnected && (
         <button
           onClick={() => connect({ connector: connectors[0] })}
