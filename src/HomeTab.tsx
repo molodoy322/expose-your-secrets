@@ -200,13 +200,13 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
       : null;
 
   // ---- Glow для своїх секретів ----
-  function getMyStyle(isMine: boolean) {
+  function getMyStyle(isMine: boolean): React.CSSProperties {
     return isMine
       ? {
           border: "2.5px solid #FFD600",
           boxShadow: "0 0 18px 3px #ffd60099, 0 0 0px 0px #FFD600",
           animation: "unicorn-glow 2.3s linear infinite",
-          position: "relative",
+          position: "relative" as const,
         }
       : {};
   }
@@ -218,7 +218,10 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
     return (
       <Card
         className="flex flex-col w-full bg-gray-900 rounded-lg p-4 mb-3"
-        style={getMyStyle(isMine)}
+        style={{
+          ...getMyStyle(isMine),
+          borderColor: isMine ? "#FFD600" : (cardStyle.border as string || "2px solid #21EF6E")
+        } as React.CSSProperties}
       >
         {/* Текст секрету */}
         <div className="text-base italic mb-4">
