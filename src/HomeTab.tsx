@@ -343,7 +343,7 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
       {isConnected && address
         ? (
           <span>
-            <svg width="20" height="20" style={{ display: "inline", marginRight: 8, verticalAlign: "middle" }}>
+            <svg width="10" height="10" style={{ display: "inline", marginRight: 8, verticalAlign: "middle" }}>
               <circle cx="10" cy="10" r="10" fill="#21EF6E" />
             </svg>
             Connected: {address.slice(0, 6)}...{address.slice(-4)}
