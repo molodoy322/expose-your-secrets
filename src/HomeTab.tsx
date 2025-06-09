@@ -217,50 +217,28 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
 
   return (
     <Card
-      className="w-full p-5 mb-5"
+      className="flex flex-col w-full p-4 mb-4"
       style={{
-        position: "relative",
-        background: "linear-gradient(115deg, #181A20 85%, #23243a 100%)",
+        borderRadius: 24,
+        background: "#161926",
+        boxShadow: "0 4px 32px #21ef6e13",
         border: isMine ? "2.5px solid #FFD600" : "2.5px solid #21EF6E",
-        borderRadius: 20,
-        boxShadow: isMine
-          ? "0 0 18px 4px #FFD60066, 0 0 0px 0px #FFD600"
-          : "0 2px 18px #21ef6e22",
-        marginBottom: 16,
-        minHeight: 105,
-        overflow: "visible"
+        position: "relative",
       }}
     >
-
-      {/* Аватар + нік справа вгорі */}
+      {/* Лого + Нік */}
       <div style={{
-        position: "absolute",
-        top: 18,
-        right: 18,
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        zIndex: 2
+        display: "flex", alignItems: "center", gap: 7, position: "absolute", top: 12, right: 16
       }}>
         <img
           src={getAvatarUrl(s.author)}
           alt="avatar"
           style={{
-            width: 30,
-            height: 30,
-            borderRadius: 8,
-            border: '2px solid #21EF6E',
-            background: "#23243a"
+            width: 28, height: 28, borderRadius: 9, border: "2px solid #21EF6E", background: "#101214"
           }}
         />
         <span style={{
-          color: "#21EF6E",
-          fontSize: 15,
-          fontWeight: 700,
-          letterSpacing: "0.5px",
-          background: "rgba(25,27,35,0.92)",
-          borderRadius: 8,
-          padding: "2.5px 9px"
+          color: "#21EF6E", fontWeight: 700, fontSize: 15, letterSpacing: "0.5px", maxWidth: 88, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap"
         }}>
           {getAnonNick(s.author)}
         </span>
@@ -268,96 +246,62 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
 
       {/* Текст секрету */}
       <div style={{
-        fontSize: 18,
-        fontWeight: 500,
-        color: "#fff",
-        fontStyle: "italic",
-        marginBottom: 28,
-        paddingRight: 100,
-        wordBreak: "break-word"
+        minHeight: 44, margin: "24px 0 18px 0",
+        color: "#fff", fontStyle: "italic", fontSize: 19,
+        wordBreak: "break-word",
       }}>
         {s.text}
       </div>
 
-      {/* Блок лайків і суперлайків */}
+      {/* КНОПКИ ЛАЙК/СУПЕРЛАЙК */}
       <div style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 10,
-        marginTop: 0,
-        justifyContent: "flex-start",
+        display: "flex", alignItems: "center", gap: 13, marginTop: 0,
       }}>
-        {/* Like */}
         <button
           onClick={() => likeSecret(s.id)}
           disabled={!isConnected || loading}
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 7,
+            display: "flex", alignItems: "center", gap: 6,
+            background: "#181A20",
             border: "2px solid #21EF6E",
-            background: "#191B23",
+            borderRadius: 16,
             color: "#21EF6E",
-            borderRadius: "999px",
             fontWeight: 700,
-            fontSize: 16,
-            padding: "8px 18px",
-            minWidth: 62,
+            fontSize: 18,
+            padding: "7px 16px 7px 13px",
+            minWidth: 60,
             boxShadow: "0 0 12px #21ef6e33",
-            cursor: (!isConnected || loading) ? "not-allowed" : "pointer",
-            opacity: (!isConnected || loading) ? 0.58 : 1,
-            transition: "all 0.18s"
+            cursor: !isConnected || loading ? "not-allowed" : "pointer",
+            opacity: !isConnected || loading ? 0.5 : 1,
+            transition: "all 0.18s",
           }}
         >
-          ❤️ <span style={{ fontWeight: 700 }}>{Number(s.likes)}</span>
+          <span style={{ fontSize: 22 }}>❤️</span>
+          {Number(s.likes)}
         </button>
 
-        {/* Super Like */}
         <button
           onClick={() => boostLikes(s.id)}
           disabled={!isConnected || loading}
           style={{
-            background: "linear-gradient(90deg, #FFD600 0%, #FF2D55 100%)",
+            display: "flex", alignItems: "center", gap: 7,
+            background: "#fff",
+            border: "none",
+            borderRadius: 16,
             color: "#23243a",
             fontWeight: 800,
-            border: "none",
-            borderRadius: "999px",
-            padding: "8px 22px",
-            fontSize: 15.2,
-            marginLeft: 5,
-            boxShadow: "0 0 12px #ffd60055",
-            cursor: (!isConnected || loading) ? "not-allowed" : "pointer",
-            opacity: (!isConnected || loading) ? 0.62 : 1,
-            transition: "all 0.17s"
+            fontSize: 17,
+            padding: "8px 19px",
+            boxShadow: "0 2px 12px #FFD60055",
+            cursor: !isConnected || loading ? "not-allowed" : "pointer",
+            opacity: !isConnected || loading ? 0.5 : 1,
+            transition: "all 0.18s",
           }}
           title="Super Like = +100 Likes (0.0001 ETH)"
         >
-          🚀 <b>Super Like (100)</b>
+          <span style={{ fontSize: 20 }}>🚀</span> Super Like (100)
         </button>
       </div>
-
-      {/* Кнопка видалити — якщо адмін */}
-      {isAdmin && (
-        <button
-          onClick={() => deleteSecret && deleteSecret(s.id)}
-          style={{
-            position: "absolute",
-            bottom: 16,
-            right: 18,
-            background: "#FF2D55",
-            color: "#fff",
-            fontWeight: 700,
-            borderRadius: 7,
-            border: "none",
-            padding: "6px 16px",
-            fontSize: 13.8,
-            boxShadow: "0 2px 10px #ff2d5555",
-            cursor: "pointer"
-          }}
-        >
-          Delete
-        </button>
-      )}
     </Card>
   );
 }
