@@ -309,160 +309,184 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
   }, []);
 
   return (
-    <div className="flex flex-col items-center w-full max-w-[420px] mx-auto px-4" style={{ gap: "16px" }}>
-  <button
-    onClick={() => {
-      if (!isConnected) connect({ connector: connectors[0] });
-    }}
-    className={`w-full py-3 font-bold rounded-lg transition 
-      ${isConnected
-        ? "bg-gradient-to-r from-[#333] to-[#666] text-white opacity-80 cursor-default"
-        : "bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white hover:opacity-90 active:scale-[0.98] cursor-pointer"}`}
-    disabled={isConnected}
-    style={{ marginTop: 0, justifyContent: "center", border: "none" }}
-  >
-    {isConnected
-      ? (
-        <span>
-          <svg width="20" height="20" style={{ display: "inline", marginRight: 8, verticalAlign: "middle" }}><circle cx="10" cy="10" r="10" fill="#21EF6E" /></svg>
-          Connected{address ? `: ${address.slice(0, 6)}...${address.slice(-4)}` : ""}
-        </span>
-      )
-      : "Connect Wallet"}
-  </button>
-      )
+  <div className="flex flex-col items-center w-full max-w-[420px] mx-auto px-4" style={{ gap: "16px" }}>
+    {/* ЛОГО */}
+    <div className="flex items-center justify-center w-full gap-2 mt-6 mb-2">
+      <span style={{ fontSize: 32 }}>🔥</span>
+      <h1
+        className="text-3xl font-extrabold text-center"
+        style={{
+          background: "linear-gradient(90deg, #21EF6E, #FF2D55)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          fontWeight: 800,
+          letterSpacing: "1px",
+        }}
+      >
+        Expose Your Secrets
+      </h1>
+      <span style={{ fontSize: 32 }}>🔥</span>
+    </div>
 
-      <div className="w-full" style={{ marginTop: 0 }}>
-        <textarea
-          value={secret}
-          onChange={(e) => setSecret(e.target.value)}
-          placeholder="Share your secret..."
-          style={{
-            width: "100%",
-            minHeight: "100px",
-            padding: "12px",
-            borderRadius: "11px",
-            background: "#161616",
-            color: "#fff",
-            border: "2px solid #21EF6E",
-            fontSize: "16px",
-            resize: "none",
-            outline: "none",
-            boxShadow: "0 0 10px #21ef6e55",
-            backdropFilter: "blur(5px)",
-            WebkitBackdropFilter: "blur(5px)"
-          }}
-        />
-        <button
-          onClick={submitSecret}
-          disabled={submitDisabled}
-          style={{
-            ...btnStyle,
-            marginTop: "8px",
-            opacity: submitDisabled ? 0.5 : 1,
-            cursor: submitDisabled ? "not-allowed" : "pointer",
-            width: "100%",
-            justifyContent: "center"
-          }}
-        >
-          {loading ? "Posting..." : "Post Secret"}
-        </button>
-      </div>
+    {/* КНОПКА WALLET */}
+    <button
+      onClick={() => {
+        if (!isConnected) connect({ connector: connectors[0] });
+      }}
+      className={`w-full py-3 font-bold rounded-lg transition 
+        ${isConnected
+          ? "bg-gradient-to-r from-[#333] to-[#666] text-white opacity-80 cursor-default"
+          : "bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white hover:opacity-90 active:scale-[0.98] cursor-pointer"}`}
+      disabled={isConnected}
+      style={{ marginTop: 0, justifyContent: "center", border: "none" }}
+    >
+      {isConnected
+        ? (
+          <span>
+            <svg width="20" height="20" style={{ display: "inline", marginRight: 8, verticalAlign: "middle" }}><circle cx="10" cy="10" r="10" fill="#21EF6E" /></svg>
+            Connected{address ? `: ${address.slice(0, 6)}...${address.slice(-4)}` : ""}
+          </span>
+        )
+        : "Connect Wallet"}
+    </button>
 
-      {info && (
-        <div style={{
+    {/* ПІДПИС "Share Anonymously" */}
+    <div className="w-full mb-2 mt-4 text-center font-bold text-base text-gray-200 tracking-wide">
+      Share Anonymously
+    </div>
+
+    {/* ФОРМА ДОДАВАННЯ СЕКРЕТУ */}
+    <div className="w-full" style={{ marginTop: 0 }}>
+      <textarea
+        value={secret}
+        onChange={(e) => setSecret(e.target.value)}
+        placeholder="Share your secret..."
+        style={{
+          width: "100%",
+          minHeight: "100px",
           padding: "12px",
           borderRadius: "11px",
           background: "#161616",
           color: "#fff",
           border: "2px solid #21EF6E",
-          fontSize: "14px",
-          textAlign: "center"
-        }}>
-          {info}
-        </div>
-      )}
+          fontSize: "16px",
+          resize: "none",
+          outline: "none",
+          boxShadow: "0 0 10px #21ef6e55",
+          backdropFilter: "blur(5px)",
+          WebkitBackdropFilter: "blur(5px)"
+        }}
+      />
+      <button
+        onClick={submitSecret}
+        disabled={submitDisabled}
+        style={{
+          ...btnStyle,
+          marginTop: "8px",
+          opacity: submitDisabled ? 0.5 : 1,
+          cursor: submitDisabled ? "not-allowed" : "pointer",
+          width: "100%",
+          justifyContent: "center"
+        }}
+      >
+        {loading ? "Posting..." : "Post Secret"}
+      </button>
+    </div>
 
-      {/* Tab switcher */}
-      <div className="flex justify-center w-full mb-6">
-        <div className="flex w-full max-w-[320px] bg-[#181A20] p-1 rounded-full">
-          <button
-            onClick={() => setActiveTab('latest')}
-            className={`flex-1 h-12 font-semibold text-base transition-all duration-300 ${
-              activeTab === 'latest'
-                ? 'bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white rounded-full shadow-lg'
-                : 'bg-transparent text-[#666] rounded-full hover:text-white'
-            }`}
-          >
-            Latest
-          </button>
-          <button
-            onClick={() => setActiveTab('top')}
-            className={`flex-1 h-12 font-semibold text-base transition-all duration-300 ${
-              activeTab === 'top'
-                ? 'bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white rounded-full shadow-lg'
-                : 'bg-transparent text-[#666] rounded-full hover:text-white'
-            }`}
-          >
-            Top
-          </button>
-        </div>
+    {info && (
+      <div style={{
+        padding: "12px",
+        borderRadius: "11px",
+        background: "#161616",
+        color: "#fff",
+        border: "2px solid #21EF6E",
+        fontSize: "14px",
+        textAlign: "center"
+      }}>
+        {info}
       </div>
+    )}
 
-      {/* Secrets list */}
-      <div className="w-full space-y-4">
-        <AnimatePresence mode="popLayout">
-          {(activeTab === 'latest' ? latestSecrets : topSecrets).map((s, idx) => (
-            <motion.div
-              key={s.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              ref={idx === (activeTab === 'latest' ? latestSecrets : topSecrets).length - 1 ? lastSecretRef : null}
-              className="flex items-center p-4 rounded-lg bg-[#181A20] shadow-md"
-            >
-              <img
-                src={getAvatarUrl(s.author)}
-                alt="avatar"
-                className="w-8 h-8 rounded-full mr-3"
-                loading="lazy"
-              />
-              <div className="flex-1">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-semibold text-white">
-                    {getAnonNick(s.author)}
-                  </span>
-                  <div className="flex items-center gap-2">
+    {/* Tab switcher */}
+    <div className="flex justify-center w-full mb-6">
+      <div className="flex w-full max-w-[320px] bg-[#181A20] p-1 rounded-full">
+        <button
+          onClick={() => setActiveTab('latest')}
+          className={`flex-1 h-12 font-semibold text-base transition-all duration-300 ${
+            activeTab === 'latest'
+              ? 'bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white rounded-full shadow-lg'
+              : 'bg-transparent text-[#666] rounded-full hover:text-white'
+          }`}
+        >
+          Latest
+        </button>
+        <button
+          onClick={() => setActiveTab('top')}
+          className={`flex-1 h-12 font-semibold text-base transition-all duration-300 ${
+            activeTab === 'top'
+              ? 'bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white rounded-full shadow-lg'
+              : 'bg-transparent text-[#666] rounded-full hover:text-white'
+          }`}
+        >
+          Top
+        </button>
+      </div>
+    </div>
+
+    {/* Secrets list */}
+    <div className="w-full space-y-4">
+      <AnimatePresence mode="popLayout">
+        {(activeTab === 'latest' ? latestSecrets : topSecrets).map((s, idx) => (
+          <motion.div
+            key={s.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            ref={idx === (activeTab === 'latest' ? latestSecrets : topSecrets).length - 1 ? lastSecretRef : null}
+            className="flex items-center p-4 rounded-lg bg-[#181A20] shadow-md"
+          >
+            <img
+              src={getAvatarUrl(s.author)}
+              alt="avatar"
+              className="w-8 h-8 rounded-full mr-3"
+              loading="lazy"
+            />
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-semibold text-white">
+                  {getAnonNick(s.author)}
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => likeSecret(s.id)}
+                    className="p-2 rounded-full hover:bg-[#23243a] transition-colors"
+                  >
+                    ❤️ {s.likes}
+                  </button>
+                  {isAdmin && (
                     <button
-                      onClick={() => likeSecret(s.id)}
+                      onClick={() => deleteSecret(s.id)}
                       className="p-2 rounded-full hover:bg-[#23243a] transition-colors"
                     >
-                      ❤️ {s.likes}
+                      🗑️
                     </button>
-                    {isAdmin && (
-                      <button
-                        onClick={() => deleteSecret(s.id)}
-                        className="p-2 rounded-full hover:bg-[#23243a] transition-colors"
-                      >
-                        🗑️
-                      </button>
-                    )}
-                  </div>
+                  )}
                 </div>
-                <p className="text-white text-base">{s.text}</p>
               </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-      </div>
-
-      {/* Loading indicator */}
-      {isFetchingNextPage && (
-        <div className="w-full flex justify-center py-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#21EF6E]"></div>
-        </div>
-      )}
+              <p className="text-white text-base">{s.text}</p>
+            </div>
+          </motion.div>
+        ))}
+      </AnimatePresence>
     </div>
-  );
+
+    {/* Loading indicator */}
+    {isFetchingNextPage && (
+      <div className="w-full flex justify-center py-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#21EF6E]"></div>
+      </div>
+    )}
+  </div>
+);
 }
