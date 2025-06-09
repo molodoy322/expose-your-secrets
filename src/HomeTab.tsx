@@ -410,28 +410,36 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
       </div>
     )}
 
-    {/* Tab switcher */}
+    {/* Tab switcher — ФІРМОВИЙ, НЕ КВАДРАТНИКИ! */}
 <div className="flex justify-center w-full my-4">
-  <div className="flex w-full max-w-[320px] bg-[#181A20] p-1 rounded-full shadow">
+  <div className="flex w-full max-w-[340px] bg-[#23243a] p-1 rounded-full shadow-lg" style={{minHeight:48}}>
     <button
       onClick={() => setActiveTab('latest')}
-      className={`flex-1 h-11 font-semibold text-base transition-all duration-300 rounded-full
-        ${activeTab === 'latest'
-          ? 'bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white shadow-lg scale-105'
-          : 'bg-transparent text-[#888] hover:text-white'
-        }`}
-      style={{ outline: "none" }}
+      className={
+        "flex-1 h-11 font-semibold text-base rounded-full transition-all duration-200 " +
+        (activeTab === 'latest'
+          ? "bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white shadow-md scale-105"
+          : "bg-transparent text-[#aaa] hover:text-white")}
+      style={{
+        border: "none",
+        outline: "none",
+        marginRight: "2px"
+      }}
     >
       Latest
     </button>
     <button
       onClick={() => setActiveTab('top')}
-      className={`flex-1 h-11 font-semibold text-base transition-all duration-300 rounded-full
-        ${activeTab === 'top'
-          ? 'bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white shadow-lg scale-105'
-          : 'bg-transparent text-[#888] hover:text-white'
-        }`}
-      style={{ outline: "none" }}
+      className={
+        "flex-1 h-11 font-semibold text-base rounded-full transition-all duration-200 " +
+        (activeTab === 'top'
+          ? "bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white shadow-md scale-105"
+          : "bg-transparent text-[#aaa] hover:text-white")}
+      style={{
+        border: "none",
+        outline: "none",
+        marginLeft: "2px"
+      }}
     >
       Top
     </button>
