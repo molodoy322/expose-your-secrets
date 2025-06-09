@@ -213,98 +213,100 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
 
   // --- Секрет-картка: для Latest i Top ---
   function SecretCard(s: any, isMine: boolean, isMotion = true) {
-  const Card = isMotion ? motion.div : 'div';
+    const Card = isMotion ? motion.div : 'div';
 
-  return (
-    <Card
-      className="flex flex-col w-full p-4 mb-4"
-      style={{
-        borderRadius: 24,
-        background: "#161926",
-        boxShadow: "0 4px 32px #21ef6e13",
-        border: isMine ? "2.5px solid #FFD600" : "2.5px solid #21EF6E",
-        position: "relative",
-      }}
-    >
-      {/* Лого + Нік */}
-      <div style={{
-        display: "flex", alignItems: "center", gap: 7, position: "absolute", top: 12, right: 16
-      }}>
-        <img
-          src={getAvatarUrl(s.author)}
-          alt="avatar"
-          style={{
-            width: 28, height: 28, borderRadius: 9, border: "2px solid #21EF6E", background: "#101214"
-          }}
-        />
-        <span style={{
-          color: "#21EF6E", fontWeight: 700, fontSize: 15, letterSpacing: "0.5px", maxWidth: 88, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap"
+    return (
+      <Card
+        key={s.id}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.3 }}
+        className="flex flex-col w-full bg-[#181A20] rounded-2xl p-4 mb-4 shadow-xl relative"
+        style={{
+          border: isMine ? "2.5px solid #FFD600" : "2px solid #21EF6E",
+          boxShadow: isMine
+            ? "0 0 18px 3px #ffd60099, 0 0 0px 0px #FFD600"
+            : "0 0 10px #21ef6e55",
+          animation: isMine ? "unicorn-glow 2.3s linear infinite" : undefined,
+          position: "relative"
+        }}
+      >
+        {/* Лого + нік у верхньому правому куті */}
+        <div style={{
+          position: 'absolute', top: 14, right: 14, display: 'flex', alignItems: 'center', gap: 7
         }}>
-          {getAnonNick(s.author)}
-        </span>
-      </div>
-
-      {/* Текст секрету */}
-      <div style={{
-        minHeight: 44, margin: "24px 0 18px 0",
-        color: "#fff", fontStyle: "italic", fontSize: 19,
-        wordBreak: "break-word",
-      }}>
-        {s.text}
-      </div>
-
-      {/* КНОПКИ ЛАЙК/СУПЕРЛАЙК */}
-      <div style={{
-        display: "flex", alignItems: "center", gap: 13, marginTop: 0,
-      }}>
-        <button
-          onClick={() => likeSecret(s.id)}
-          disabled={!isConnected || loading}
-          style={{
-            display: "flex", alignItems: "center", gap: 6,
-            background: "#181A20",
-            border: "2px solid #21EF6E",
-            borderRadius: 16,
-            color: "#21EF6E",
+          <img
+            src={getAvatarUrl(s.author)}
+            alt="avatar"
+            style={{ width: 28, height: 28, borderRadius: 9, boxShadow: "0 0 8px #21EF6E80" }}
+          />
+          <span style={{
             fontWeight: 700,
-            fontSize: 18,
-            padding: "7px 16px 7px 13px",
-            minWidth: 60,
-            boxShadow: "0 0 12px #21ef6e33",
-            cursor: !isConnected || loading ? "not-allowed" : "pointer",
-            opacity: !isConnected || loading ? 0.5 : 1,
-            transition: "all 0.18s",
-          }}
-        >
-          <span style={{ fontSize: 22 }}>❤️</span>
-          {Number(s.likes)}
-        </button>
+            fontSize: 15,
+            color: "#21EF6E",
+            background: "#161616AA",
+            borderRadius: 6,
+            padding: "3px 10px"
+          }}>
+            {getAnonNick(s.author)}
+          </span>
+        </div>
 
-        <button
-          onClick={() => boostLikes(s.id)}
-          disabled={!isConnected || loading}
-          style={{
-            display: "flex", alignItems: "center", gap: 7,
-            background: "#fff",
-            border: "none",
-            borderRadius: 16,
-            color: "#23243a",
-            fontWeight: 800,
-            fontSize: 17,
-            padding: "8px 19px",
-            boxShadow: "0 2px 12px #FFD60055",
-            cursor: !isConnected || loading ? "not-allowed" : "pointer",
-            opacity: !isConnected || loading ? 0.5 : 1,
-            transition: "all 0.18s",
-          }}
-          title="Super Like = +100 Likes (0.0001 ETH)"
-        >
-          <span style={{ fontSize: 20 }}>🚀</span> Super Like (100)
-        </button>
-      </div>
-    </Card>
-  );
-}
+        {/* Текст секрету */}
+        <div className="text-lg italic mb-6 text-white" style={{ minHeight: 28 }}>
+          {s.text}
+        </div>
+
+        {/* Нижній блок з Like / Super Like / Кількість лайків */}
+        <div className="flex flex-row items-center gap-3 mt-2 w-full">
+          <button
+            onClick={() => likeSecret(s.id)}
+            disabled={!isConnected || loading}
+            style={{
+              background: "#161616",
+              border: "2px solid #21EF6E",
+              borderRadius: 12,
+              padding: "7px 18px",
+              fontWeight: 700,
+              color: "#21EF6E",
+              fontSize: 16,
+              display: "flex",
+              alignItems: "center",
+              gap: 7,
+              boxShadow: "0 0 8px #21ef6e30",
+              opacity: !isConnected || loading ? 0.5 : 1
+            }}
+          >
+            ❤️ <span style={{ fontWeight: 700 }}>{Number(s.likes)}</span>
+          </button>
+
+          <button
+            onClick={() => boostLikes(s.id)}
+            disabled={!isConnected || loading}
+            style={{
+              background: "linear-gradient(90deg, #fff 65%, #FFD600 100%)",
+              color: "#23243a",
+              fontWeight: 900,
+              fontSize: 18,
+              borderRadius: 13,
+              padding: "7px 18px",
+              marginLeft: 8,
+              boxShadow: "0 4px 16px #FFD60050",
+              border: "none",
+              display: "flex",
+              alignItems: "center",
+              gap: 9,
+              opacity: !isConnected || loading ? 0.7 : 1
+            }}
+            title="Super Like = +100 Likes (0.0001 ETH)"
+          >
+            🚀 <span>Super Like (100)</span>
+          </button>
+        </div>
+      </Card>
+    );
+  }
 
   // --- Стан для спіннера refresh ---
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -517,117 +519,9 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
     {/* Secrets list */}
     <div className="w-full space-y-4">
       <AnimatePresence mode="popLayout">
-        {(activeTab === 'latest' ? latestSecrets : topSecrets).map((s, idx) => (
-          <motion.div
-  key={s.id}
-  initial={{ opacity: 0, y: 20 }}
-  animate={{ opacity: 1, y: 0 }}
-  exit={{ opacity: 0, y: -20 }}
-  transition={{ duration: 0.3 }}
-  className="relative w-full"
-  style={{
-    background: "linear-gradient(120deg, #181A20 90%, #23243a 100%)",
-    border: "2px solid #23243a",
-    borderRadius: 18,
-    boxShadow: "0 4px 28px #21ef6e13, 0 1.5px 8px #23243a55",
-    padding: "18px 16px 15px 16px",
-    marginBottom: 15,
-    minHeight: 110
-  }}
->
-  {/* AVATAR + NICK — прямо в карточці справа зверху */}
-  <div style={{
-    position: 'absolute',
-    top: 14,
-    right: 14,
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-    zIndex: 2
-  }}>
-    <img
-      src={getAvatarUrl(s.author)}
-      alt="avatar"
-      style={{
-        width: 28,
-        height: 28,
-        borderRadius: 9,
-        border: '2px solid #21EF6E',
-        background: "#23243a"
-      }}
-      loading="lazy"
-    />
-    <span style={{
-      color: "#21EF6E",
-      fontSize: 15,
-      fontWeight: 700,
-      background: "rgba(25,27,35,0.92)",
-      borderRadius: 7,
-      padding: "2px 8px",
-      boxShadow: "0 0 3px #181A20, 0 2px 4px #23243a22",
-      letterSpacing: ".1px"
-    }}>
-      {getAnonNick(s.author)}
-    </span>
-  </div>
-
-  {/* ТЕКСТ СЕКРЕТУ */}
-  <div style={{
-    fontSize: 17,
-    fontWeight: 500,
-    color: "#f8f8f8",
-    fontStyle: "italic",
-    minHeight: 38,
-    paddingRight: 100,
-    wordBreak: "break-word"
-  }}>
-    {s.text}
-  </div>
-
-  {/* КНОПКИ: все в 1 ряд, компакт, crypto-style */}
-  <div style={{
-    display: "flex",
-    alignItems: "center",
-    gap: 10,
-    marginTop: 18,
-    flexWrap: "wrap"
-  }}>
-    {/* Лайк з лічильником */}
-    <button
-      onClick={() => likeSecret(s.id)}
-      className="flex items-center gap-1 px-4 py-1.5 rounded-full font-semibold text-base"
-      style={{
-        border: "2px solid #21EF6E",
-        background: "#191B23",
-        color: "#21EF6E",
-        boxShadow: "0 0 8px #21ef6e55",
-        minWidth: 60,
-        fontWeight: 700,
-        fontSize: 16,
-        transition: "all 0.16s"
-      }}
-    >
-      ❤️ <span style={{ marginLeft: 2 }}>{s.likes}</span>
-    </button>
-    {/* Super Like */}
-    <button
-      onClick={() => boostLikes(s.id)}
-      className="bg-gradient-to-r from-[#FFD600] to-[#FF2D55] text-[#23243a] font-extrabold rounded-full px-5 py-1.5 text-sm shadow hover:shadow-lg transition-all"
-      title="Super Like = +100 Likes (0.0001 ETH)"
-      style={{
-        fontWeight: 700,
-        letterSpacing: "0.2px",
-        minWidth: 105,
-        fontSize: 15,
-        boxShadow: "0 0 10px #FFD60033"
-      }}
-    >
-      🚀 Super Like (100)
-    </button>
-  </div>
-</motion.div>
-
-        ))}
+        {(activeTab === 'latest' ? latestSecrets : topSecrets).map((s) =>
+          SecretCard(s, s.author?.toLowerCase() === address?.toLowerCase())
+        )}
       </AnimatePresence>
     </div>
 
