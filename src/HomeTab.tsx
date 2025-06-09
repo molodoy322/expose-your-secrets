@@ -496,45 +496,104 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
       <AnimatePresence mode="popLayout">
         {(activeTab === 'latest' ? latestSecrets : topSecrets).map((s, idx) => (
           <motion.div
-            key={s.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-            ref={idx === (activeTab === 'latest' ? latestSecrets : topSecrets).length - 1 ? lastSecretRef : null}
-            className="flex items-center p-4 rounded-lg bg-[#181A20] shadow-md"
-          >
-            <img
-              src={getAvatarUrl(s.author)}
-              alt="avatar"
-              className="w-8 h-8 rounded-full mr-3"
-              loading="lazy"
-            />
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-semibold text-white">
-                  {getAnonNick(s.author)}
-                </span>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => likeSecret(s.id)}
-                    className="p-2 rounded-full hover:bg-[#23243a] transition-colors"
-                  >
-                    ❤️ {s.likes}
-                  </button>
-                  {isAdmin && (
-                    <button
-                      onClick={() => deleteSecret(s.id)}
-                      className="p-2 rounded-full hover:bg-[#23243a] transition-colors"
-                    >
-                      🗑️
-                    </button>
-                  )}
-                </div>
-              </div>
-              <p className="text-white text-base">{s.text}</p>
-            </div>
-          </motion.div>
+  key={s.id}
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  exit={{ opacity: 0, y: -20 }}
+  transition={{ duration: 0.3 }}
+  className="relative w-full"
+  style={{
+    background: "linear-gradient(120deg, #181A20 85%, #23243a 100%)",
+    border: "2px solid #23243a",
+    borderRadius: 16,
+    boxShadow: "0 4px 24px #21ef6e13, 0 1.5px 6px #23243a55",
+    padding: "20px 18px 14px 18px",
+    marginBottom: 12
+  }}
+>
+  {/* AVATAR + NICK */}
+  <div style={{
+    position: 'absolute',
+    top: 14,
+    right: 14,
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    zIndex: 2
+  }}>
+    <img
+      src={getAvatarUrl(s.author)}
+      alt="avatar"
+      style={{
+        width: 28,
+        height: 28,
+        borderRadius: 8,
+        border: '2px solid #FFD600',
+        background: "#23243a"
+      }}
+      loading="lazy"
+    />
+    <span style={{
+      color: "#FFD600",
+      fontSize: 15,
+      fontWeight: 700,
+      background: "rgba(25,27,35,0.92)",
+      borderRadius: 7,
+      padding: "2.5px 7px"
+    }}>
+      {getAnonNick(s.author)}
+    </span>
+  </div>
+
+  {/* TEXT */}
+  <div style={{
+    fontSize: 17,
+    fontWeight: 500,
+    color: "#f8f8f8",
+    fontStyle: "italic",
+    minHeight: 40,
+    paddingRight: 100,
+    wordBreak: "break-word"
+  }}>
+    {s.text}
+  </div>
+
+  {/* BUTTONS (Like + Super Like + Admin) */}
+  <div style={{
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    marginTop: 20
+  }}>
+    <button
+      onClick={() => likeSecret(s.id)}
+      className="bg-[#181A20] border-2 border-[#21EF6E] px-4 py-1.5 rounded-xl text-sm font-semibold text-white transition"
+      style={{ minWidth: 65 }}
+    >
+      ❤️ {s.likes}
+    </button>
+    <button
+      onClick={() => boostLikes(s.id)}
+      className="bg-gradient-to-r from-[#FFD600] to-[#FF2D55] text-[#23243a] font-extrabold rounded-xl px-5 py-1.5 text-sm shadow hover:shadow-lg transition-all"
+      title="Super Like = +100 Likes (0.0001 ETH)"
+      style={{
+        fontWeight: 700,
+        minWidth: 95
+      }}
+    >
+      🚀 Super Like (100)
+    </button>
+    {isAdmin && (
+      <button
+        onClick={() => deleteSecret(s.id)}
+        className="bg-[#FF2D55] text-white rounded-lg px-3 py-1 text-sm font-bold shadow"
+      >
+        🗑️
+      </button>
+    )}
+  </div>
+</motion.div>
+
         ))}
       </AnimatePresence>
     </div>
