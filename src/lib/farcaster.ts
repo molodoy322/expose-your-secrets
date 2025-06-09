@@ -10,51 +10,6 @@ export const farcasterConfig = {
 }
 
 let sdkInitialized = false;
-let initializationAttempts = 0;
-const MAX_INIT_ATTEMPTS = 30;
-const INIT_INTERVAL = 200;
-
-// Функция для проверки загрузки скрипта SDK
-function isSDKScriptLoaded(): boolean {
-  return document.querySelector('script[src*="frame-sdk"]') !== null;
-}
-
-// Функция для ожидания загрузки скрипта
-function waitForSDKScript(): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (isSDKScriptLoaded()) {
-      resolve();
-      return;
-    }
-
-    const observer = new MutationObserver((mutations, obs) => {
-      if (isSDKScriptLoaded()) {
-        obs.disconnect();
-        resolve();
-      }
-    });
-
-    observer.observe(document.head, {
-      childList: true,
-      subtree: true
-    });
-
-    // Таймаут на случай, если скрипт не загрузится
-    setTimeout(() => {
-      observer.disconnect();
-      reject(new Error('SDK script not loaded after timeout'));
-    }, 10000);
-  });
-}
-
-// Функция для проверки доступности методов SDK
-function checkSDKMethods(): boolean {
-  return (
-    typeof window.frame?.sdk?.ready === 'function' &&
-    window.frame?.sdk?.actions &&
-    typeof window.frame.sdk.actions.post === 'function'
-  );
-}
 
 export async function initializeFarcaster() {
   console.log('Initializing Farcaster SDK...');
@@ -68,44 +23,21 @@ export async function initializeFarcaster() {
   }
 
   try {
-    // Ждем загрузки скрипта SDK
-    await waitForSDKScript();
-    console.log('SDK script loaded');
+    // Даем время на загрузку SDK
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Ждем инициализации SDK
-    let attempts = 0;
-    while (attempts < MAX_INIT_ATTEMPTS) {
-      attempts++;
-      console.log(`Checking for Farcaster SDK (attempt ${attempts}/${MAX_INIT_ATTEMPTS})...`);
-
-      if (window.frame?.sdk) {
-        console.log('Farcaster SDK found');
-        
-        if (checkSDKMethods()) {
-          console.log('Farcaster SDK methods available');
-          
-          try {
-            await window.frame.sdk.ready();
-            console.log('Farcaster SDK ready method called successfully');
-            sdkInitialized = true;
-            return;
-          } catch (error) {
-            console.warn('Error calling Farcaster SDK ready method:', error);
-          }
-        } else {
-          console.log('Waiting for Farcaster SDK methods...');
-        }
-      } else {
-        console.log('Farcaster SDK not found');
-      }
-
-      await new Promise(resolve => setTimeout(resolve, INIT_INTERVAL));
+    if (!window.frame?.sdk) {
+      console.log('Farcaster SDK not found');
+      return;
     }
 
-    throw new Error('Farcaster SDK methods not available after maximum attempts');
+    console.log('Farcaster SDK found, calling ready()...');
+    await window.frame.sdk.ready();
+    console.log('Farcaster SDK ready() called successfully');
+    sdkInitialized = true;
   } catch (error) {
     console.error('Failed to initialize Farcaster SDK:', error);
-    throw error;
+    // Не выбрасываем ошибку, чтобы приложение продолжало работать
   }
 }
 
@@ -115,7 +47,7 @@ export async function shareToFarcaster(text: string, imageUrl?: string) {
       await initializeFarcaster();
     }
 
-    if (!checkSDKMethods()) {
+    if (!window.frame?.sdk?.actions?.post) {
       throw new Error('Farcaster SDK or actions not available for sharing');
     }
 
