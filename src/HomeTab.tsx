@@ -236,7 +236,7 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
               disabled={!isConnected || loading}
               className="bg-[#181A20] border-2 px-4 py-1.5 rounded-lg text-sm font-semibold text-white min-w-[66px]"
               style={{
-                borderColor: isMine ? "#FFD600" : (cardStyle.border || "2px solid #21EF6E")
+                borderColor: isMine ? "#FFD600" : (cardStyle.border as string || "2px solid #21EF6E")
               }}
             >
               👍 Like
