@@ -7,6 +7,12 @@ import { base } from 'viem/chains'
 // Основна адреса контракту
 export const CONTRACT_ADDRESS = "0xC786be8d7aa704bf274B155Cb60CBFE4D3c50D5d";
 
+// Ініціалізуємо publicClient
+export const publicClient = createPublicClient({
+  chain: base,
+  transport: http('https://base-mainnet.infura.io/v3/9010eab5407747c68ac69b02ffee4255')
+})
+
 
 
 
@@ -301,12 +307,6 @@ export const ABI = [
 		"type": "function"
 	}
 ];
-
-// Підключення до mainnet Base:
-export const publicClient = createPublicClient({
-  chain: base,
-  transport: http('https://base-mainnet.infura.io/v3/9010eab5407747c68ac69b02ffee4255')
-});
 
 export async function getPostsToday(address: string, today: number) {
   return await publicClient.readContract({

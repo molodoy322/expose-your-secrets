@@ -1,5 +1,4 @@
 import { useAccount, useConnect, useDisconnect } from "wagmi";
-import { useNetwork, useSwitchNetwork } from 'wagmi/hooks';
 import { useState, useEffect, useCallback } from "react";
 import { CONTRACT_ADDRESS, ABI, publicClient } from "./lib/contract";
 import { encodeFunctionData } from "viem";
@@ -12,6 +11,7 @@ import BottomNav from "./BottomNav";
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { initializeFarcaster } from "./lib/farcaster";
 import { base } from 'wagmi/chains';
+import { useChainId, useSwitchChain } from 'wagmi';
 
 declare global { interface Window { ethereum?: any } }
 
@@ -53,8 +53,8 @@ function loadProfileState(address: string | undefined): {id: number, likes: numb
 const BASE_CHAIN_ID = 8453;
 
 function RequireBaseNetwork({ children }: { children: React.ReactNode }) {
-  const { chain } = useNetwork();
-  const { switchNetwork } = useSwitchNetwork();
+  const chainId = useChainId();
+  const { switchChain } = useSwitchChain();
   const [isCorrectNetwork, setIsCorrectNetwork] = useState(true);
 
   useEffect(() => {
@@ -89,10 +89,7 @@ function RequireBaseNetwork({ children }: { children: React.ReactNode }) {
     if (!window.ethereum) return;
     
     try {
-      await window.ethereum.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: "0x" + BASE_CHAIN_ID.toString(16) }],
-      });
+      await switchChain({ chainId: BASE_CHAIN_ID });
     } catch (error) {
       console.error('Error switching network:', error);
       alert("Please switch network to Base in your wallet.");
@@ -291,9 +288,9 @@ function debounce<T extends (...args: any[]) => any>(
 
 export default function App() {
   // Инициализируем Farcaster SDK сразу
-  useEffect(() => {
-    initializeFarcaster();
-  }, []);
+  // useEffect(() => {
+  //   initializeFarcaster();
+  // }, []);
 
   const [fetchLoading, setFetchLoading] = useState(true);
   const { isConnected, address } = useAccount();

@@ -4,6 +4,12 @@ import { base } from 'viem/chains';
 // Адреса контракту GmStreak
 export const GM_CONTRACT_ADDRESS = "0x399017dA3CF3B2A7148cEdc1C4Dc0228c03Cfb4C";
 
+// Ініціалізуємо publicClient
+export const publicClient = createPublicClient({
+	chain: base,
+	transport: http('https://base-mainnet.infura.io/v3/9010eab5407747c68ac69b02ffee4255')
+});
+
 // ABI для контракту GmStreak
 export const GM_ABI = [
 	{
@@ -510,87 +516,74 @@ export const GM_ABI = [
 	}
 ];
 
-export const gmPublicClient = createPublicClient({
-    chain: base,
-    transport: http('https://base-mainnet.infura.io/v3/9010eab5407747c68ac69b02ffee4255')
-});
-
-interface GmUserStats {
-    currentStreak: bigint;
-    totalCheckIns: bigint;
-    lastCheckIn: bigint;
-    longestStreak: bigint;
-    isActive: boolean;
-}
-
 export async function getGmUserStats(userAddress: string, chainId: number) {
-    try {
-        const stats = await gmPublicClient.readContract({
-            address: GM_CONTRACT_ADDRESS,
-            abi: GM_ABI,
-            functionName: 'getUserStats',
-            args: [userAddress, BigInt(chainId)],
-        }) as [bigint, bigint, bigint, bigint, boolean];
-        
-        return {
-            currentStreak: stats[0],
-            totalCheckIns: stats[1],
-            lastCheckIn: stats[2],
-            longestStreak: stats[3],
-            isActive: stats[4]
-        };
-    } catch (error) {
-        console.error('Error fetching GM user stats:', error);
-        return {
-            currentStreak: BigInt(0),
-            totalCheckIns: BigInt(0),
-            lastCheckIn: BigInt(0),
-            longestStreak: BigInt(0),
-            isActive: false
-        };
-    }
+	try {
+		const stats = await publicClient.readContract({
+			address: GM_CONTRACT_ADDRESS,
+			abi: GM_ABI,
+			functionName: 'getUserStats',
+			args: [userAddress, BigInt(chainId)],
+		}) as [bigint, bigint, bigint, bigint, boolean];
+		
+		return {
+			currentStreak: stats[0],
+			totalCheckIns: stats[1],
+			lastCheckIn: stats[2],
+			longestStreak: stats[3],
+			isActive: stats[4]
+		};
+	} catch (error) {
+		console.error('Error fetching GM user stats:', error);
+		return {
+			currentStreak: BigInt(0),
+			totalCheckIns: BigInt(0),
+			lastCheckIn: BigInt(0),
+			longestStreak: BigInt(0),
+			isActive: false
+		};
+	}
 }
 
 export async function getGmCheckInPrice() {
-    try {
-        const price = await gmPublicClient.readContract({
-            address: GM_CONTRACT_ADDRESS,
-            abi: GM_ABI,
-            functionName: 'getCheckInPrice',
-        });
-        return price;
-    } catch (error) {
-        console.error('Error fetching check-in price:', error);
-        return BigInt(0); // Default to 0 if an error occurs
-    }
+	try {
+		const price = await publicClient.readContract({
+			address: GM_CONTRACT_ADDRESS,
+			abi: GM_ABI,
+			functionName: 'getCheckInPrice',
+		});
+		return price;
+	} catch (error) {
+		console.error('Error fetching check-in price:', error);
+		return BigInt(0); // Default to 0 if an error occurs
+	}
 }
 
 export async function getGmCurrentTime() {
-    try {
-        const time = await gmPublicClient.readContract({
-            address: GM_CONTRACT_ADDRESS,
-            abi: GM_ABI,
-            functionName: 'getCurrentTime',
-        });
-        return time;
-    } catch (error) {
-        console.error('Error fetching current time from GM contract:', error);
-        return BigInt(0); // Default to 0 if an error occurs
-    }
+	try {
+		const time = await publicClient.readContract({
+			address: GM_CONTRACT_ADDRESS,
+			abi: GM_ABI,
+			functionName: 'getCurrentTime',
+		});
+		return time;
+	} catch (error) {
+		console.error('Error fetching current time from GM contract:', error);
+		return BigInt(0); // Default to 0 if an error occurs
+	}
 }
 
 export async function getGmCurrentDay() {
-    try {
-        const day = await gmPublicClient.readContract({
-            address: GM_CONTRACT_ADDRESS,
-            abi: GM_ABI,
-            functionName: 'getCurrentDay',
-        });
-        return day;
-    } catch (error) {
-        console.error('Error fetching current day from GM contract:', error);
-        return BigInt(0); // Default to 0 if an error occurs
-    }
+	try {
+		const day = await publicClient.readContract({
+			address: GM_CONTRACT_ADDRESS,
+			abi: GM_ABI,
+			functionName: 'getCurrentDay',
+		});
+		return day;
+	} catch (error) {
+		console.error('Error fetching current day from GM contract:', error);
+		return BigInt(0); // Default to 0 if an error occurs
+	}
 }
 
 export const CHAIN_ID = 8453; // Base chain ID
