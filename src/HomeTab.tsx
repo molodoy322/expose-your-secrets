@@ -333,20 +333,37 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
       onClick={() => {
         if (!isConnected) connect({ connector: connectors[0] });
       }}
-      className={`w-full py-3 font-bold rounded-lg transition 
-        ${isConnected
-          ? "bg-gradient-to-r from-[#333] to-[#666] text-white opacity-80 cursor-default"
-          : "bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white hover:opacity-90 active:scale-[0.98] cursor-pointer"}`}
+      style={{
+        width: 170,
+        height: 38,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontWeight: 700,
+        fontSize: 15,
+        borderRadius: 14,
+        background: isConnected
+          ? 'linear-gradient(90deg, #333 0%, #666 100%)'
+          : 'linear-gradient(90deg, #21EF6E 0%, #FF2D55 100%)',
+        color: '#fff',
+        border: 'none',
+        boxShadow: isConnected
+          ? '0 1px 6px #3336'
+          : '0 1px 8px #21ef6e66',
+        opacity: isConnected ? 0.82 : 1,
+        cursor: isConnected ? 'default' : 'pointer',
+        margin: '8px 0',
+        transition: 'all 0.18s'
+      }}
       disabled={isConnected}
-      style={{ marginTop: 0, justifyContent: "center", border: "none" }}
     >
       {isConnected && address
         ? (
-          <span>
-            <svg width="10" height="10" style={{ display: "inline", marginRight: 8, verticalAlign: "middle" }}>
-              <circle cx="5" cy="5" r="5" fill="#21EF6E" />
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <svg width="16" height="16" style={{ marginRight: 4 }}>
+              <circle cx="8" cy="8" r="8" fill="#21EF6E" />
             </svg>
-            Connected: {address.slice(0, 6)}...{address.slice(-4)}
+            {address.slice(0, 6)}...{address.slice(-4)}
           </span>
         )
         : "Connect Wallet"}
