@@ -6,6 +6,7 @@ interface Window {
     sdk: {
       ready: () => Promise<void>;
       actions: {
+        ready: () => Promise<void>;
         post: (options: {
           title?: string;
           image?: string;

@@ -36,6 +36,7 @@ async function loadSDK(): Promise<void> {
       try {
         if (window.frame?.sdk) {
           await window.frame.sdk.ready();
+          await window.frame.sdk.actions.ready();
           sdkInitialized = true;
           resolve();
         } else {
