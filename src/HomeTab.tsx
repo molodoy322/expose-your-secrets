@@ -234,27 +234,20 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
       >
         {/* Лого + нік у верхньому правому куті */}
         <div style={{
-          position: 'absolute',
-          top: 8, right: 12,
-          display: 'flex', alignItems: 'center', gap: 4
+          position: "absolute",
+          top: 14, right: 20,
+          display: "flex", alignItems: "center", gap: 7
         }}>
           <img
             src={getAvatarUrl(s.author)}
+            style={{ width: 32, height: 32, borderRadius: 8, border: "2px solid #21EF6E" }}
             alt="avatar"
-            style={{
-              width: 18,
-              height: 18,
-              borderRadius: 5,
-              boxShadow: "0 0 4px #21EF6E55"
-            }}
           />
           <span style={{
             fontWeight: 700,
-            fontSize: 11,
             color: "#21EF6E",
-            background: "#181A20cc",
-            borderRadius: 3,
-            padding: "1px 7px"
+            fontSize: 18,
+            letterSpacing: "0.2px"
           }}>
             {getAnonNick(s.author)}
           </span>
@@ -268,80 +261,81 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
             marginTop: 7,
             marginBottom: 30,
             paddingRight: 90, // щоб нік не залазив на текст
-            wordBreak: "break-word"
+            wordBreak: "break-word",
+            textAlign: "center"
           }}
         >
           {s.text}
         </div>
 
-        {/* Функціонал внизу, все в одну строку */}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 12,
-            justifyContent: "flex-start",
-            marginTop: 16,
-            marginBottom: -4
-          }}
+        {/* Функціонал внизу */}
+        <div 
+          className="flex items-center justify-between w-full mt-8 gap-3"
+          style={{ minHeight: 56 }}
         >
           {/* Лайк */}
           <button
             onClick={() => likeSecret(s.id)}
             disabled={!isConnected || loading}
             style={{
-              background: "#23243a",
+              background: "#181A20",
               border: "2px solid #21EF6E",
-              borderRadius: "50%",
-              width: 34,
-              height: 34,
+              borderRadius: 999,
+              width: 54,
+              height: 54,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontWeight: 700,
-              color: "#21EF6E",
-              fontSize: 18,
-              boxShadow: "0 0 2px #21ef6e30",
-              opacity: !isConnected || loading ? 0.5 : 1,
-              transition: "all 0.15s"
+              fontSize: 28,
+              boxShadow: "0 0 12px #21ef6e66",
+              transition: "all 0.14s"
             }}
-          >❤️</button>
-          
-          {/* Кількість лайків */}
-          <span style={{
-            fontWeight: 700,
-            fontSize: 17,
-            color: "#FFD600",
-            background: "#181A20ee",
-            borderRadius: 8,
-            padding: "2px 14px"
-          }}>
-            {Number(s.likes)}
-          </span>
-          
+          >
+            ❤️
+          </button>
+
           {/* Super Like */}
           <button
             onClick={() => boostLikes(s.id)}
             disabled={!isConnected || loading}
             style={{
-              background: "linear-gradient(90deg, #fff 60%, #FFD600 100%)",
-              color: "#23243a",
-              fontWeight: 900,
-              fontSize: 14,
-              borderRadius: 999,
-              padding: "5px 18px 5px 15px",
-              boxShadow: "0 2px 12px #FFD60040",
+              background: "linear-gradient(90deg,#ffe066 0%,#ffd600 50%,#ff2d55 100%)",
               border: "none",
+              borderRadius: 999,
+              padding: "0 32px",
+              height: 48,
+              color: "#23243a",
+              fontWeight: 700,
+              fontSize: 20,
+              boxShadow: "0 4px 18px #ffd60055",
               display: "flex",
               alignItems: "center",
-              gap: 6,
-              opacity: !isConnected || loading ? 0.7 : 1
+              gap: 9,
+              margin: "0 8px"
             }}
-            title="Super Like = +100 Likes (0.0001 ETH)"
           >
-            🚀 <span style={{ fontWeight: 700 }}>Super Like</span>
+            🚀 <span>Super Like</span>
           </button>
+
+          {/* Лічильник лайків */}
+          <div
+            style={{
+              background: "#181A20",
+              border: "2px solid #21EF6E",
+              borderRadius: 999,
+              width: 48,
+              height: 48,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#21EF6E",
+              fontWeight: 800,
+              fontSize: 20,
+              boxShadow: "0 0 10px #21ef6e22"
+            }}
+          >
+            {Number(s.likes)}
+          </div>
         </div>
       </Card>
     );
