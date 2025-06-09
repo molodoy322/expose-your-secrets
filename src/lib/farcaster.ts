@@ -13,6 +13,39 @@ let sdkInitialized = false;
 let initializationAttempts = 0;
 const MAX_INIT_ATTEMPTS = 3;
 
+// Функция для проверки загрузки скрипта SDK
+function isSDKScriptLoaded(): boolean {
+  return document.querySelector('script[src*="frame-sdk"]') !== null;
+}
+
+// Функция для ожидания загрузки скрипта
+function waitForSDKScript(): Promise<void> {
+  return new Promise((resolve) => {
+    if (isSDKScriptLoaded()) {
+      resolve();
+      return;
+    }
+
+    const observer = new MutationObserver((mutations, obs) => {
+      if (isSDKScriptLoaded()) {
+        obs.disconnect();
+        resolve();
+      }
+    });
+
+    observer.observe(document.head, {
+      childList: true,
+      subtree: true
+    });
+
+    // Таймаут на случай, если скрипт не загрузится
+    setTimeout(() => {
+      observer.disconnect();
+      resolve();
+    }, 5000);
+  });
+}
+
 export async function initializeFarcaster() {
   console.log('Initializing Farcaster SDK...');
   
@@ -24,11 +57,15 @@ export async function initializeFarcaster() {
     return;
   }
 
+  // Ждем загрузки скрипта SDK
+  await waitForSDKScript();
+  console.log('SDK script loaded');
+
   const waitForSDK = () => {
     return new Promise<void>((resolve, reject) => {
       let attempts = 0;
-      const maxAttempts = 20;
-      const interval = 250;
+      const maxAttempts = 30; // Увеличиваем количество попыток
+      const interval = 200; // Уменьшаем интервал
 
       const checkSDK = () => {
         attempts++;
@@ -47,7 +84,7 @@ export async function initializeFarcaster() {
           } else {
             console.log('Waiting for Farcaster SDK methods...');
             if (attempts >= maxAttempts) {
-              reject(new Error('Farcaster SDK methods not available after maximum attempts'));
+              reject(new Error('Farcaster SDK ready method not available after maximum attempts'));
             } else {
               setTimeout(checkSDK, interval);
             }
@@ -86,7 +123,7 @@ export async function initializeFarcaster() {
     }
   } catch (error) {
     console.error('Failed to initialize Farcaster SDK:', error);
-    throw error; // Пробрасываем ошибку дальше для обработки
+    throw error;
   }
 }
 
