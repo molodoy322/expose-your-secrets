@@ -14,80 +14,63 @@ let initializationAttempts = 0;
 const MAX_INIT_ATTEMPTS = 3;
 
 export async function initializeFarcaster() {
-  if (sdkInitialized) {
-    console.log('Farcaster SDK already initialized');
+  console.log('Initializing Farcaster SDK...');
+  
+  if (typeof window === 'undefined') {
+    console.warn('Farcaster SDK: Window is not defined');
     return;
   }
 
-  if (initializationAttempts >= MAX_INIT_ATTEMPTS) {
-    console.warn('Max initialization attempts reached');
+  const isInIframe = window.self !== window.top;
+  console.log('Running in iframe:', isInIframe);
+
+  if (!isInIframe) {
+    console.log('Not running in iframe, skipping Farcaster SDK initialization');
     return;
   }
 
-  initializationAttempts++;
+  let initializationAttempts = 0;
+  const MAX_INIT_ATTEMPTS = 10;
+  const INIT_DELAY = 500;
+
+  const waitForSDK = () => {
+    return new Promise<void>((resolve, reject) => {
+      const checkSDK = () => {
+        initializationAttempts++;
+        console.log(`Checking for Farcaster SDK (attempt ${initializationAttempts}/${MAX_INIT_ATTEMPTS})...`);
+
+        if (window.frame?.sdk) {
+          console.log('Farcaster SDK found');
+          resolve();
+        } else if (initializationAttempts >= MAX_INIT_ATTEMPTS) {
+          console.warn('Farcaster SDK not found after maximum attempts');
+          reject(new Error('Farcaster SDK not found'));
+        } else {
+          setTimeout(checkSDK, INIT_DELAY);
+        }
+      };
+      checkSDK();
+    });
+  };
 
   try {
-    // Проверяем, находимся ли мы в iframe
-    const isInIframe = window.self !== window.top;
-    console.log('Running in iframe:', isInIframe);
-
-    // Ждем загрузки SDK с таймаутом
-    if (typeof window !== 'undefined' && !window.frame?.sdk) {
-      await new Promise((resolve) => {
-        let attempts = 0;
-        const maxAttempts = 50; // 5 секунд максимум
-        const timeout = setTimeout(() => {
-          console.warn('Farcaster SDK loading timeout');
-          resolve(false);
-        }, 5000);
-        
-        const checkSDK = () => {
-          if (window.frame?.sdk) {
-            clearTimeout(timeout);
-            resolve(true);
-          } else if (attempts < maxAttempts) {
-            attempts++;
-            setTimeout(checkSDK, 100);
-          } else {
-            clearTimeout(timeout);
-            console.warn('Farcaster SDK not loaded after attempts');
-            resolve(false);
-          }
-        };
-        checkSDK();
-      });
+    await waitForSDK();
+    
+    if (window.frame?.sdk?.ready) {
+      console.log('Calling Farcaster SDK ready method...');
+      await window.frame.sdk.ready();
+      console.log('Farcaster SDK initialized successfully');
+    } else {
+      console.warn('Farcaster SDK ready method not available');
     }
 
-    // Инициализируем SDK
-    if (window.frame?.sdk) {
-      try {
-        if (typeof window.frame.sdk.ready === 'function') {
-          await window.frame.sdk.ready();
-          console.log('Farcaster SDK initialized successfully');
-          sdkInitialized = true;
-        } else {
-          console.warn('Farcaster SDK ready method not available');
-          // Проверяем наличие других методов SDK
-          if (window.frame.sdk.actions) {
-            console.log('Farcaster SDK actions available');
-            sdkInitialized = true;
-          }
-        }
-      } catch (error) {
-        console.error('Error during Farcaster SDK ready:', error);
-        // Проверяем, можем ли мы продолжить без ready
-        if (window.frame.sdk.actions) {
-          console.log('Continuing without ready method');
-          sdkInitialized = true;
-        }
-      }
+    if (window.frame?.sdk?.actions) {
+      console.log('Farcaster SDK actions available');
     } else {
-      console.warn('Farcaster SDK not available');
-      sdkInitialized = true; // Продолжаем работу даже без SDK
+      console.warn('Farcaster SDK actions not available');
     }
   } catch (error) {
-    console.error('Failed to initialize Farcaster:', error);
-    sdkInitialized = true; // Продолжаем работу даже при ошибке
+    console.error('Error initializing Farcaster SDK:', error);
   }
 }
 

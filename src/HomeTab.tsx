@@ -228,7 +228,7 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
           <img 
             src={getAvatarUrl(s.author)} 
             alt="avatar" 
-            style={{width:24,height:24,borderRadius:6,background:"#23243a",border:"2px solid #23243a"}}
+            style={{width: 24, height: 24, borderRadius: 6, background: "#23243a", border: "2px solid #23243a"}}
             loading="lazy"
           />
           <span style={{
