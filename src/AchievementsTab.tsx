@@ -418,10 +418,9 @@ export default function AchievementsTab({
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
       style={{
-        maxWidth: "100%",
-        width: "100%",
-        margin: "0px auto 0 auto",
-        padding: "36px 20px 42px 20px",
+        width: "calc(100% - 40px)",
+        margin: "0 auto",
+        padding: "20px",
         background: "rgba(36, 58, 37, 0.33)",
         borderRadius: 26,
         border: "2px solid #21EF6E",
@@ -432,8 +431,7 @@ export default function AchievementsTab({
         color: "#fff",
         fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
         overflowX: "hidden",
-        boxSizing: "border-box",
-        position: "relative"
+        boxSizing: "border-box"
       }}
     >
       {error && (
@@ -543,13 +541,13 @@ export default function AchievementsTab({
       {/* Category Tabs */}
       <div style={{
         display: "flex",
-        justifyContent: "center",
-        gap: 12,
-        marginBottom: 30,
+        flexDirection: "row",
         flexWrap: "wrap",
+        justifyContent: "center",
+        gap: "10px",
+        marginBottom: "30px",
         width: "100%",
-        boxSizing: "border-box",
-        padding: "0 10px"
+        boxSizing: "border-box"
       }}>
         {achievements.map((category) => (
           <motion.button
@@ -612,12 +610,11 @@ export default function AchievementsTab({
             
             <div style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-              gap: 16,
-              marginBottom: 20,
+              gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+              gap: "15px",
+              marginBottom: "20px",
               width: "100%",
-              boxSizing: "border-box",
-              padding: "0 10px"
+              boxSizing: "border-box"
             }}>
               {activeCategoryData.achievements.map((achievement) => (
                 <motion.div
