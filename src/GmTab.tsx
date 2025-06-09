@@ -285,7 +285,7 @@ export default function GmTab({ secrets, onStreakUpdate }: GmTabProps) {
               Processing...
             </>
           ) : canCheckIn() ? (
-            <>🌞 Check In</>
+            <>🌞 Check In (BASE)</>
           ) : (
             <>⏳ {Math.floor(timeUntilNextCheckIn / 3600)}h {Math.floor((timeUntilNextCheckIn % 3600) / 60)}m</>
           )}
