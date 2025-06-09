@@ -1,21 +1,230 @@
 :root {
-  background-color: #181818;
-  color: rgba(255, 255, 255, 0.87);
-  color-scheme: light dark;
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  font-synthesis: none;
-  font-weight: 400;
-  line-height: 1.5;
-  text-rendering: optimizeLegibility;
-
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
+  --primary-color: #21EF6E;
+  --secondary-color: #FF2D55;
+  --background-dark: #181A20;
+  --background-light: #23243a;
+  --text-color: #fff;
+  --text-muted: #aaa;
+  --border-radius: 16px;
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    background-color: #f8f8f8;
-    color: #181818;
+/* Базовые стили для мобильных устройств */
+html {
+  font-size: 16px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(120deg, var(--background-dark) 0%, var(--background-light) 100%);
+  color: var(--text-color);
+  min-height: 100vh;
+}
+
+/* Контейнер для всего приложения */
+.app-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-sm);
+}
+
+/* Адаптивные стили для разных размеров экрана */
+@media (min-width: 480px) {
+  html {
+    font-size: 16px;
   }
+  
+  .app-container {
+    padding: var(--spacing-md);
+  }
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 18px;
+  }
+  
+  .app-container {
+    padding: var(--spacing-lg);
+  }
+}
+
+@media (min-width: 1024px) {
+  html {
+    font-size: 20px;
+  }
+  
+  .app-container {
+    padding: var(--spacing-xl);
+  }
+}
+
+/* Общие стили для карточек */
+.card {
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: var(--border-radius);
+  background: var(--background-light);
+  border: 1px solid var(--primary-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 768px) {
+  .card {
+    padding: 1.5rem;
+  }
+}
+
+/* Стили для кнопок */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px; /* Минимальная высота для тач-устройств */
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid var(--primary-color);
+  background: var(--background-light);
+  color: var(--text-color);
+  width: 100%;
+  max-width: 100%;
+  touch-action: manipulation; /* Улучшает отзывчивость на тач-устройствах */
+  -webkit-tap-highlight-color: transparent; /* Убирает подсветку при тапе на iOS */
+}
+
+@media (min-width: 768px) {
+  .button {
+    width: auto;
+    min-width: 120px;
+  }
+}
+
+/* Улучшенные стили для интерактивных элементов */
+button, 
+a, 
+input[type="button"], 
+input[type="submit"] {
+  min-height: 44px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Улучшенные стили для текстовых полей */
+input[type="text"],
+input[type="password"],
+textarea {
+  font-size: 1rem;
+  padding: 0.75rem;
+  min-height: 44px;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--primary-color);
+  background: var(--background-light);
+  color: var(--text-color);
+  width: 100%;
+}
+
+/* Стили для сеток */
+.grid {
+  display: grid;
+  gap: var(--spacing-md);
+}
+
+/* Адаптивные сетки */
+@media (min-width: 768px) {
+  .grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Стили для текста */
+h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: var(--spacing-md);
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: var(--spacing-sm);
+}
+
+p {
+  font-size: 1rem;
+  line-height: 1.5;
+  margin-bottom: var(--spacing-sm);
+}
+
+/* Стили для навигации */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(27,27,34,0.77);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-top: 2px solid var(--primary-color);
+  padding: var(--spacing-xs) 0;
+  z-index: 999;
+}
+
+/* Анимации */
+@keyframes spin360 {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Утилиты */
+.text-center {
+  text-align: center;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.gap-sm {
+  gap: var(--spacing-xs);
+}
+
+.gap-md {
+  gap: var(--spacing-sm);
+}
+
+.gap-lg {
+  gap: var(--spacing-md);
 }

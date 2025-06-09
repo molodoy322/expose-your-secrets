@@ -646,29 +646,41 @@ export default function App() {
   };
 
   return (
-    <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 20px" }}>
+    <div className="app-container" style={{
+      width: "100%",
+      maxWidth: "1200px",
+      margin: "0 auto",
+      padding: "1rem",
+      minHeight: "100vh",
+      display: "flex",
+      flexDirection: "column"
+    }}>
       <div style={{
-          paddingTop: 30,
-          paddingLeft: 30,
-          paddingRight: 30,
-          paddingBottom: 90,
-          textAlign: "center",
-          minHeight: "100vh",
-          background: "linear-gradient(120deg, #181A20 0%, #23243a 100%)",
-          color: "#fff"
+        flex: 1,
+        paddingTop: "1rem",
+        paddingBottom: "calc(4rem + 60px)", // Учитываем высоту нижней навигации
+        textAlign: "center",
+        background: "linear-gradient(120deg, var(--background-dark) 0%, var(--background-light) 100%)",
+        color: "var(--text-color)"
+      }}>
+        <h1 style={{
+          fontSize: "clamp(1.8rem, 5vw, 2.7rem)",
+          marginBottom: "1rem",
+          background: "linear-gradient(90deg, var(--primary-color), var(--secondary-color))",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          fontWeight: 800,
+          letterSpacing: "1.3px",
+          padding: "0 1rem"
         }}>
-          <h1 style={{
-            fontSize: "2.7rem",
-            marginBottom: 16,
-            background: "linear-gradient(90deg, #21EF6E, #FF2D55)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            fontWeight: 800,
-            letterSpacing: "1.3px"
-          }}>
-            🔥 Expose Your Secrets 🔥
-          </h1>
+          🔥 Expose Your Secrets 🔥
+        </h1>
 
+        <div style={{
+          maxWidth: "800px",
+          margin: "0 auto",
+          padding: "0 1rem"
+        }}>
           {activeTab === "home" && <HomeTab {...homeTabProps} />}
           {activeTab === "profile" && <ProfileTab {...profileTabProps} />}
           {activeTab === "gm" && <GmTab secrets={secrets} onStreakUpdate={handleStreakUpdate} />}
@@ -682,12 +694,13 @@ export default function App() {
             />
           )}
           {activeTab === "help" && <HelpTab />}
-          <BottomNav
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            hasNewProfile={hasNewProfile}
-          />
         </div>
+      </div>
+      <BottomNav
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        hasNewProfile={hasNewProfile}
+      />
     </div>
   );
 }
