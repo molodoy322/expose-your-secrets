@@ -213,154 +213,70 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
 
   // --- Секрет-картка: для Latest i Top ---
   function SecretCard(s: any, isMine: boolean, isMotion = true) {
+    const Card = isMotion ? motion.div : 'div';
+    
     return (
-      <>
-        {/* --- Аватар + нік у правому верхньому куті --- */}
-        <div style={{
-          position: "absolute",
-          top: 11,
-          right: 0,
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          zIndex: 9,
-          background: "rgba(34,34,50,0.82)",
-          borderRadius: 8,
-          padding: "3.5px 12px 3.5px 6px",
-          boxShadow: "0 2px 10px #0002"
-        }}>
-          <img 
-            src={getAvatarUrl(s.author)} 
-            alt="avatar" 
-            style={{width: "24px", height: "24px", borderRadius: 6, background: "#23243a", border: "2px solid #23243a"}}
-            loading="lazy"
-          />
-          <span style={{
-            fontWeight:700,
-            fontSize:16,
-            color:"#fff",
-            letterSpacing:0.3,
-            opacity:0.92,
-            whiteSpace:'nowrap'
-          }}>
-            {getAnonNick(s.author)}
-          </span>
+      <Card
+        className="flex flex-col w-full bg-gray-900 rounded-lg p-4 mb-3"
+        style={getMyStyle(isMine)}
+      >
+        {/* Текст секрету */}
+        <div className="text-base italic mb-4">
+          {s.text}
         </div>
-        {/* --- Єдиноріг тільки для своїх секретів --- */}
-        {isMine && (
-          <motion.span
-            initial={{ scale: 0.6, rotate: -10, filter: "blur(2px)" }}
-            animate={{ scale: 1.15, rotate: [10, -10, 10], filter: "blur(0px)" }}
-            transition={{ repeat: Infinity, duration: 2.5, ease: "linear" }}
-            style={{
-              position: "absolute",
-              top: 10,
-              left: 16,
-              fontSize: 32,
-              filter: "drop-shadow(0 0 9px #FFD600)",
-              pointerEvents: "none",
-              userSelect: "none"
-            }}
-            title="This is your secret"
-          >🦄</motion.span>
-        )}
-        {/* --- Сам секрет --- */}
-        <div style={{
-          fontStyle: "italic",
-          fontSize: 20,
-          marginBottom: 7,
-          marginTop: 28,
-          letterSpacing: "0.4px",
-          textAlign: "center"
-        }}>{s.text}</div>
-        {/* --- Like + лайки (завжди внизу) --- */}
-        <div style={{
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  gap: 10,
-  marginTop: "auto",
-  paddingTop: 14,
-  borderTop: "1px solid #333",
-  paddingBottom: 6,
-  paddingLeft: 16,
-  paddingRight: 16,
-}}>
-  <button
-    onClick={() => likeSecret(s.id)}
-    disabled={!isConnected || loading}
-    style={{
-      background: "#181A20",
-      border: isMine ? "2px solid #FFD600" : (cardStyle.border || "2px solid #21EF6E"),
-      padding: "6px 16px",
-      fontSize: 15,
-      borderRadius: 11,
-      color: "#fff",
-      fontWeight: 600,
-      cursor: "pointer",
-      minWidth: 66,
-      marginRight: 6
-    }}
-  >
-    👍 Like
-  </button>
 
-  <button
-    onClick={() => boostLikes(s.id)}
-    disabled={!isConnected || loading}
-    style={{
-      background: "linear-gradient(90deg,#FFD600,#FF2D55)",
-      color: "#23243a",
-      fontWeight: 800,
-      border: "none",
-      borderRadius: 14,
-      fontSize: 15,
-      padding: "6px 20px",
-      boxShadow: "0 0 8px 2px #FFD60055",
-      margin: "0 10px",
-      cursor: loading ? "not-allowed" : "pointer",
-      opacity: loading ? 0.66 : 1,
-      transition: "box-shadow 0.2s",
-      outline: "none"
-    }}
-    title="Super Like = +100 Likes (0.0001 ETH)"
-  >
-    🚀 Super Like (100)
-  </button>
+        {/* Нижняя часть с аватаром, именем и кнопками */}
+        <div className="flex items-center justify-between gap-2 pt-3 border-t border-gray-800">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => likeSecret(s.id)}
+              disabled={!isConnected || loading}
+              className="bg-[#181A20] border-2 px-4 py-1.5 rounded-lg text-sm font-semibold text-white min-w-[66px]"
+              style={{
+                borderColor: isMine ? "#FFD600" : (cardStyle.border || "2px solid #21EF6E")
+              }}
+            >
+              👍 Like
+            </button>
 
-  <span style={{
-    fontSize: 17,
-    fontWeight: "bold",
-    color: isMine ? "#FFD600" : (cardStyle.color || "#21EF6E"),
-    letterSpacing: 0.2,
-    whiteSpace: 'nowrap',
-    marginLeft: 12
-  }}>
-    ❤️ {Number(s.likes)} Likes
-  </span>
+            <button
+              onClick={() => boostLikes(s.id)}
+              disabled={!isConnected || loading}
+              className="bg-gradient-to-r from-[#FFD600] to-[#FF2D55] text-[#23243a] font-extrabold rounded-xl px-5 py-1.5 text-sm shadow-lg hover:shadow-xl transition-all duration-200"
+              title="Super Like = +100 Likes (0.0001 ETH)"
+            >
+              🚀 Super Like (100)
+            </button>
 
-{/* --- КНОПКА ВИДАЛИТИ ДЛЯ АДМІНА --- */}
-        {isAdmin && (
-          <button
-            onClick={() => deleteSecret && deleteSecret(s.id)}
-            style={{
-              marginLeft: 14,
-              background: "#FF2D55",
-              color: "#fff",
-              border: "none",
-              borderRadius: 9,
-              fontWeight: 700,
-              padding: "6px 14px",
-              cursor: "pointer",
-              fontSize: 14,
-              boxShadow: "0 0 8px 2px #FF2D5555"
-            }}
-          >
-            Видалити
-          </button>
-        )}
-      </div>
-      </>
+            <span className="text-base font-bold whitespace-nowrap"
+              style={{
+                color: isMine ? "#FFD600" : (cardStyle.color || "#21EF6E")
+              }}>
+              ❤️ {Number(s.likes)} Likes
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {isAdmin && (
+              <button
+                onClick={() => deleteSecret && deleteSecret(s.id)}
+                className="bg-[#FF2D55] text-white rounded-lg px-3.5 py-1.5 text-sm font-bold shadow-lg"
+              >
+                Видалити
+              </button>
+            )}
+            <span className="font-bold text-base truncate">
+              {getAnonNick(s.author)}
+            </span>
+            <img 
+              src={getAvatarUrl(s.author)} 
+              alt="avatar" 
+              className="w-10 h-10 rounded-lg"
+              loading="lazy"
+            />
+          </div>
+        </div>
+      </Card>
     );
   }
 
@@ -429,27 +345,29 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
       </div>
 
       {/* Tab switcher */}
-      <div className="flex w-full mb-6">
-        <button
-          onClick={() => setActiveTab('latest')}
-          className={`flex-1 h-12 rounded-l-lg font-semibold transition-all duration-200 ${
-            activeTab === 'latest'
-              ? 'bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white'
-              : 'bg-transparent border border-[#21EF6E33] text-[#666]'
-          }`}
-        >
-          Latest
-        </button>
-        <button
-          onClick={() => setActiveTab('top')}
-          className={`flex-1 h-12 rounded-r-lg font-semibold transition-all duration-200 ${
-            activeTab === 'top'
-              ? 'bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white'
-              : 'bg-transparent border border-[#21EF6E33] text-[#666]'
-          }`}
-        >
-          Top
-        </button>
+      <div className="flex justify-center w-full mb-6">
+        <div className="flex w-full max-w-[320px] bg-[#181A20] p-1 rounded-full">
+          <button
+            onClick={() => setActiveTab('latest')}
+            className={`flex-1 h-12 font-semibold text-base transition-all duration-300 ${
+              activeTab === 'latest'
+                ? 'bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white rounded-full shadow-lg'
+                : 'bg-transparent text-[#666] rounded-full hover:text-white'
+            }`}
+          >
+            Latest
+          </button>
+          <button
+            onClick={() => setActiveTab('top')}
+            className={`flex-1 h-12 font-semibold text-base transition-all duration-300 ${
+              activeTab === 'top'
+                ? 'bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white rounded-full shadow-lg'
+                : 'bg-transparent text-[#666] rounded-full hover:text-white'
+            }`}
+          >
+            Top
+          </button>
+        </div>
       </div>
 
       {/* Secrets list */}
