@@ -235,7 +235,7 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
         {/* Лого + нік у верхньому правому куті */}
         <div style={{
           position: "absolute",
-          top: 18,
+          top: 8,
           right: 8,
           display: "flex",
           alignItems: "center",
@@ -262,14 +262,14 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
   style={{
     textAlign: "center",
     marginBottom: 16,
-    fontSize: 18,
+    fontSize: 16,
     color: "#fff",
     fontStyle: "italic",
     width: "100%",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    minHeight: 54,  // або більше, якщо треба для багаторядкового тексту
+    minHeight: 84,  // або більше, якщо треба для багаторядкового тексту
     wordBreak: "break-word",
     lineHeight: 1.5,
   }}
