@@ -4,8 +4,8 @@ interface Window {
   ethereum?: any;
   frame?: {
     sdk: {
-      ready?: () => Promise<void>;
-      actions?: {
+      ready: () => Promise<void>;
+      actions: {
         post: (options: {
           title?: string;
           image?: string;
@@ -26,31 +26,31 @@ interface Window {
 }
 
 declare module '*.svg' {
-  const content: string;
-  export default content;
+  const src: string;
+  export default src;
 }
 
 declare module '*.png' {
-  const content: string;
-  export default content;
+  const src: string;
+  export default src;
 }
 
 declare module '*.jpg' {
-  const content: string;
-  export default content;
+  const src: string;
+  export default src;
 }
 
 declare module '*.jpeg' {
-  const content: string;
-  export default content;
+  const src: string;
+  export default src;
 }
 
 declare module '*.gif' {
-  const content: string;
-  export default content;
+  const src: string;
+  export default src;
 }
 
 declare module '*.webp' {
-  const content: string;
-  export default content;
+  const src: string;
+  export default src;
 }
