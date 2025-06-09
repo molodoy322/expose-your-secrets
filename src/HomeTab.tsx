@@ -103,8 +103,8 @@ export default function HomeTab({
   secrets,
   prevSecrets = [],
   loading,
-  isAdmin,           // <-- додав!
-  deleteSecret,      // <-- додав!
+  isAdmin,
+  deleteSecret,
   submitSecret,
   likeSecret,
   boostLikes,
@@ -378,218 +378,172 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
     fetchNextPage();
   }, 1000);
 
+  // --- Додаємо стейт для табів ---
+  const [activeTab, setActiveTab] = useState<'latest' | 'top'>('latest');
+  const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth <= 768);
+
+  // --- Слідкуємо за розміром екрану ---
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
-    <>
-      {/* Кнопка connect/disconnect */}
+    <div className="flex-col">
       {!isConnected ? (
-        <button
-          style={{
-            ...btnStyle,
-            background: "#161616",
-            border: "2px solid #FF2D55",
-            marginBottom: 24
-          }}
-          onClick={() => connect({ connector: connectors[0] })}
-        >
-          Connect Wallet
-        </button>
-      ) : (
-        <div style={{ marginBottom: 20 }}>
-          <div style={{ fontSize: 18, marginBottom: 6 }}>
-            Wallet: {address?.slice(0, 6)}...{address?.slice(-4)}
-          </div>
-          <button
-            style={{
-              ...btnStyle,
-              padding: "7px 24px",
-              border: "2px solid #FF2D55",
-              marginTop: 6,
-              background: "#161616",
-              color: "#fff"
-            }}
-            onClick={() => disconnect()}
-          >
-            Disconnect
-          </button>
-        </div>
-      )}
-
-      <hr style={{
-        margin: "30px 0",
-        border: "none",
-        height: 2,
-        background: "linear-gradient(90deg, #21EF6E 0%, #FF2D55 100%)",
-        borderRadius: 6
-      }} />
-
-      {/* Форма добавления секрета */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="card"
-        style={{
-          maxWidth: "600px",
-          margin: "0 auto var(--spacing-lg)",
-          padding: "var(--spacing-md)"
-        }}
-      >
-        <textarea
-          value={secret}
-          onChange={(e) => setSecret(e.target.value)}
-          placeholder="Share your secret anonymously..."
-          style={{
-            width: "100%",
-            minHeight: "100px",
-            padding: "var(--spacing-sm)",
-            borderRadius: "var(--border-radius)",
-            background: "rgba(34,36,58,0.66)",
-            border: "1px solid var(--primary-color)",
-            color: "var(--text-color)",
-            fontSize: "1rem",
-            resize: "vertical",
-            marginBottom: "var(--spacing-sm)"
-          }}
-        />
-
-        <div className="flex gap-sm" style={{ flexWrap: "wrap" }}>
-          <button
-            onClick={submitSecret}
-            disabled={submitDisabled}
-            className="button"
-            style={{
-              flex: "1",
-              minWidth: "200px",
-              opacity: submitDisabled ? 0.55 : 1,
-              background: submitDisabled ? "var(--background-dark)" : "var(--background-light)",
-              color: submitDisabled ? "var(--text-muted)" : "var(--text-color)",
-              border: submitDisabled ? "2px solid #343a40" : "2px solid var(--primary-color)",
-              boxShadow: submitDisabled ? "none" : "0 0 10px var(--primary-color)"
-            }}
-          >
-            Drop a Secret (0.00001 ETH)
-            <span style={{ fontSize: "1.5rem", marginLeft: "var(--spacing-xs)" }}>🤫💬</span>
-          </button>
-        </div>
-      </motion.div>
-
-      <hr style={{
-        margin: "var(--spacing-lg) 0",
-        border: "none",
-        height: "2px",
-        background: "linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%)",
-        borderRadius: "6px"
-      }} />
-
-      {/* Основной контент */}
-      <div className="grid" style={{
-        gridTemplateColumns: "1fr",
-        gap: "var(--spacing-lg)"
-      }}>
-        {/* Latest Secrets */}
-        <div>
-          <h2 style={{
-            fontSize: "clamp(1.5rem, 4vw, 2.1rem)",
-            marginBottom: "var(--spacing-sm)",
-            background: "linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            fontWeight: 800,
-            letterSpacing: "0.8px"
-          }}>
-            Latest Secrets
-          </h2>
-          <ul style={{ listStyle: "none", padding: 0, margin: "0 auto" }}>
-            {latestSecrets.length === 0 && (
-              <li style={{ color: "var(--text-muted)", fontStyle: "italic" }}>No secrets yet. Be the first!</li>
-            )}
-            <AnimatePresence>
-              {latestSecrets.map((s, idx) => {
-                const isMine = s.author?.toLowerCase() === address?.toLowerCase();
-                const ref = idx === latestSecrets.length - 1 ? lastSecretRef : undefined;
-                return (
-                  <motion.li
-                    key={s.id}
-                    ref={ref}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3, delay: idx * 0.1 }}
-                    style={{
-                      marginBottom: "var(--spacing-md)"
-                    }}
-                  >
-                    {SecretCardMemo(s, isMine)}
-                  </motion.li>
-                );
-              })}
-            </AnimatePresence>
-          </ul>
-
-          {/* Load More Button */}
-          {hasNextPage && (
-            <div style={{ textAlign: "center", marginTop: "var(--spacing-md)" }}>
+        <div className="card">
+          <h2>Connect Wallet</h2>
+          <p>Connect your wallet to start sharing secrets</p>
+          <div className="flex-col">
+            {connectors.map((connector: any) => (
               <button
-                onClick={() => throttledFetchNextPage(fetchNextPage)}
-                disabled={isFetchingNextPage}
+                key={connector.id}
+                onClick={() => connect({ connector })}
                 className="button"
-                style={{
-                  background: "var(--background-light)",
-                  color: "var(--text-color)",
-                  border: "2px solid var(--primary-color)",
-                  opacity: isFetchingNextPage ? 0.7 : 1
-                }}
               >
-                {isFetchingNextPage ? (
-                  <>
-                    <span style={{ animation: "spin360 1s linear infinite" }}>🔄</span>
-                    Loading more secrets...
-                  </>
-                ) : (
-                  "Load More"
-                )}
+                Connect {connector.name}
               </button>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
-      </div>
-
-      {/* Info Message */}
-      {info && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          className="card"
-          style={{
-            background: "rgba(33,239,110,0.1)",
-            border: "1px solid var(--primary-color)",
-            color: "var(--primary-color)",
-            fontSize: "0.875rem",
-            fontWeight: 600,
-            marginTop: "var(--spacing-md)"
-          }}
-        >
-          {info}
-          {info === "Your secret has been added!" && (
+      ) : (
+        <>
+          <div className="card">
+            <h2>Share your secret</h2>
+            <textarea
+              value={secret}
+              onChange={(e) => setSecret(e.target.value)}
+              placeholder="Write your secret here..."
+              className="input"
+              style={{ minHeight: "100px", resize: "vertical" }}
+            />
             <button
-              onClick={() => shareToFarcaster(
-                `🤫 I just shared a secret on Expose Your Secrets!\n\n${secret}\n\nShare your secrets too: https://expose-your-secrets.vercel.app`,
-                'https://expose-your-secrets.vercel.app/og.png'
-              )}
+              onClick={submitSecret}
+              disabled={loading}
               className="button"
+            >
+              {loading ? "Posting..." : "Post Secret"}
+            </button>
+          </div>
+
+          {/* --- Мобільний таб-перемикач --- */}
+          {isMobile ? (
+            <div
               style={{
-                background: "linear-gradient(90deg, var(--primary-color), var(--secondary-color))",
-                color: "var(--background-dark)",
-                marginTop: "var(--spacing-sm)",
-                width: "100%"
+                display: 'flex',
+                width: '100%',
+                gap: 12,
+                margin: '16px 0',
+                borderRadius: 14,
+                background: 'rgba(34,36,58,0.66)',
+                boxShadow: '0 2px 10px #21ef6e11',
+                padding: 4,
               }}
             >
-              🤫 Share on Farcaster
+              <button
+                onClick={() => setActiveTab('latest')}
+                style={{
+                  flex: 1,
+                  minHeight: 44,
+                  fontSize: '1rem',
+                  borderRadius: 12,
+                  border: activeTab === 'latest' ? '2px solid #21EF6E' : '2px solid transparent',
+                  background: activeTab === 'latest' ? 'linear-gradient(90deg, #21EF6E, #1affb0)' : 'transparent',
+                  color: activeTab === 'latest' ? '#23243a' : '#fff',
+                  fontWeight: 700,
+                  transition: 'all 0.2s',
+                  boxShadow: activeTab === 'latest' ? '0 0 10px #21ef6e55' : 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                Latest
+              </button>
+              <button
+                onClick={() => setActiveTab('top')}
+                style={{
+                  flex: 1,
+                  minHeight: 44,
+                  fontSize: '1rem',
+                  borderRadius: 12,
+                  border: activeTab === 'top' ? '2px solid #FFD600' : '2px solid transparent',
+                  background: activeTab === 'top' ? 'linear-gradient(90deg, #FFD600, #FF2D55)' : 'transparent',
+                  color: activeTab === 'top' ? '#23243a' : '#fff',
+                  fontWeight: 700,
+                  transition: 'all 0.2s',
+                  boxShadow: activeTab === 'top' ? '0 0 10px #FFD60055' : 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                Top
+              </button>
+            </div>
+          ) : null}
+
+          {/* --- Списки секретів --- */}
+          {isMobile ? (
+            <div className="secrets-grid">
+              {activeTab === 'latest' && latestSecrets.map((s: any) => (
+                <div key={s.id} className="card">
+                  {SecretCardMemo(s, s.author?.toLowerCase() === address?.toLowerCase())}
+                </div>
+              ))}
+              {activeTab === 'top' && topSecrets.map((s: any) => (
+                <div key={s.id} className="card">
+                  {SecretCardMemo(s, s.author?.toLowerCase() === address?.toLowerCase())}
+                </div>
+              ))}
+            </div>
+          ) : (
+            // Десктоп: як було — дві секції поряд
+            <div className="flex-row" style={{ gap: 24, marginTop: 24 }}>
+              <div style={{ flex: 1 }}>
+                <h2 style={{ color: '#21EF6E', marginBottom: 12 }}>Latest Secrets</h2>
+                <div className="secrets-grid">
+                  {latestSecrets.map((s: any) => (
+                    <div key={s.id} className="card">
+                      {SecretCardMemo(s, s.author?.toLowerCase() === address?.toLowerCase())}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div style={{ flex: 1 }}>
+                <h2 style={{ color: '#FFD600', marginBottom: 12 }}>Top Secrets</h2>
+                <div className="secrets-grid">
+                  {topSecrets.map((s: any) => (
+                    <div key={s.id} className="card">
+                      {SecretCardMemo(s, s.author?.toLowerCase() === address?.toLowerCase())}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {hasNextPage && !isMobile && (
+            <button
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+              className="button"
+            >
+              {isFetchingNextPage ? "Loading..." : "Load More"}
             </button>
           )}
-        </motion.div>
+
+          {info && (
+            <div style={{
+              padding: "var(--spacing-md)",
+              background: "rgba(255, 45, 85, 0.1)",
+              borderRadius: "var(--border-radius)",
+              marginTop: "var(--spacing-md)",
+            }}>
+              {info}
+            </div>
+          )}
+        </>
       )}
-    </>
+    </div>
   );
 }
