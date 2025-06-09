@@ -18,11 +18,18 @@ export async function initializeFarcaster() {
     // Ждем загрузки SDK
     if (typeof window !== 'undefined' && !window.frame?.sdk) {
       await new Promise((resolve) => {
+        let attempts = 0;
+        const maxAttempts = 50; // 5 секунд максимум
+        
         const checkSDK = () => {
           if (window.frame?.sdk) {
             resolve(true);
-          } else {
+          } else if (attempts < maxAttempts) {
+            attempts++;
             setTimeout(checkSDK, 100);
+          } else {
+            console.warn('Farcaster SDK not loaded after timeout');
+            resolve(false);
           }
         };
         checkSDK();
@@ -31,19 +38,24 @@ export async function initializeFarcaster() {
 
     // Инициализируем SDK
     if (window.frame?.sdk) {
-      // Проверяем наличие метода ready
-      if (typeof window.frame.sdk.ready === 'function') {
-        await window.frame.sdk.ready();
+      try {
+        if (typeof window.frame.sdk.ready === 'function') {
+          await window.frame.sdk.ready();
+          console.log('Farcaster SDK initialized successfully');
+        } else {
+          console.warn('Farcaster SDK ready method not available');
+        }
+      } catch (error) {
+        console.error('Error during Farcaster SDK ready:', error);
       }
       sdkInitialized = true;
-      console.log('Farcaster SDK initialized successfully');
     } else {
       console.warn('Farcaster SDK not available');
+      sdkInitialized = true; // Продолжаем работу даже без SDK
     }
   } catch (error) {
     console.error('Failed to initialize Farcaster:', error);
-    // Продолжаем работу даже при ошибке инициализации
-    sdkInitialized = true;
+    sdkInitialized = true; // Продолжаем работу даже при ошибке
   }
 }
 
@@ -53,7 +65,7 @@ export async function shareToFarcaster(text: string, imageUrl?: string) {
       await initializeFarcaster();
     }
 
-    if (window.frame?.sdk?.actions) {
+    if (window.frame?.sdk?.actions?.post) {
       await window.frame.sdk.actions.post({
         title: "Expose Your Secrets",
         image: imageUrl || "https://expose-your-secrets.vercel.app/og.png",
@@ -71,7 +83,7 @@ export async function shareToFarcaster(text: string, imageUrl?: string) {
       });
       console.log('Successfully shared to Farcaster');
     } else {
-      console.warn('Farcaster SDK or actions not available for sharing.');
+      console.warn('Farcaster SDK or actions not available for sharing');
       if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
         alert("Шеринг в Farcaster работает только на публичном домене. При разработке на localhost эта функция недоступна.");
       } else {

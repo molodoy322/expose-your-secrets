@@ -5,7 +5,7 @@ interface Window {
   frame?: {
     sdk: {
       ready?: () => Promise<void>;
-      actions: {
+      actions?: {
         post: (options: {
           title?: string;
           image?: string;
