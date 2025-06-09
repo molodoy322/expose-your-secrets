@@ -274,68 +274,74 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
           {s.text}
         </div>
 
-        {/* Функціонал внизу */}
+        {/* Функціонал внизу, все в одну строку */}
         <div
-          className="flex flex-row items-center gap-4 w-full"
           style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 12,
             justifyContent: "flex-start",
-            marginTop: "auto",
-            position: "absolute",
-            left: 18,
-            bottom: 12
+            marginTop: 16,
+            marginBottom: -4
           }}
         >
+          {/* Лайк */}
           <button
             onClick={() => likeSecret(s.id)}
             disabled={!isConnected || loading}
             style={{
-              background: "#181A20",
+              background: "#23243a",
               border: "2px solid #21EF6E",
-              borderRadius: 999,
-              padding: "4px 13px",
+              borderRadius: "50%",
+              width: 34,
+              height: 34,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               fontWeight: 700,
               color: "#21EF6E",
-              fontSize: 17,
-              boxShadow: "0 0 4px #21ef6e30",
-              opacity: !isConnected || loading ? 0.5 : 1
+              fontSize: 18,
+              boxShadow: "0 0 2px #21ef6e30",
+              opacity: !isConnected || loading ? 0.5 : 1,
+              transition: "all 0.15s"
             }}
-          >
-            ❤️
-          </button>
-
+          >❤️</button>
+          
+          {/* Кількість лайків */}
+          <span style={{
+            fontWeight: 700,
+            fontSize: 17,
+            color: "#FFD600",
+            background: "#181A20ee",
+            borderRadius: 8,
+            padding: "2px 14px"
+          }}>
+            {Number(s.likes)}
+          </span>
+          
+          {/* Super Like */}
           <button
             onClick={() => boostLikes(s.id)}
             disabled={!isConnected || loading}
             style={{
-              background: "linear-gradient(90deg, #fff 65%, #FFD600 100%)",
+              background: "linear-gradient(90deg, #fff 60%, #FFD600 100%)",
               color: "#23243a",
               fontWeight: 900,
               fontSize: 14,
               borderRadius: 999,
-              padding: "4px 13px",
-              boxShadow: "0 2px 12px #FFD60050",
+              padding: "5px 18px 5px 15px",
+              boxShadow: "0 2px 12px #FFD60040",
               border: "none",
               display: "flex",
               alignItems: "center",
-              gap: 7,
+              gap: 6,
               opacity: !isConnected || loading ? 0.7 : 1
             }}
             title="Super Like = +100 Likes (0.0001 ETH)"
           >
             🚀 <span style={{ fontWeight: 700 }}>Super Like</span>
           </button>
-
-          <span style={{
-            marginLeft: 10,
-            fontWeight: 800,
-            fontSize: 17,
-            color: "#FFD600",
-            background: "#181A20dd",
-            borderRadius: 8,
-            padding: "3px 13px"
-          }}>
-            {Number(s.likes)}
-          </span>
         </div>
       </Card>
     );
