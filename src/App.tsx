@@ -1,5 +1,5 @@
+import React, { useState, useEffect, useCallback } from "react";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
-import { useState, useEffect, useCallback } from "react";
 import { CONTRACT_ADDRESS, ABI, publicClient } from "./lib/contract";
 import { encodeFunctionData } from "viem";
 import HomeTab from "./HomeTab";
@@ -642,7 +642,7 @@ export default function App() {
   };
 
   return (
-    <RequireBaseNetwork>
+    // <RequireBaseNetwork>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 20px" }}>
         {!isConnected ? (
           <div className="connect-wallet">
@@ -693,7 +693,7 @@ export default function App() {
           </div>
         )}
       </div>
-    </RequireBaseNetwork>
+    // </RequireBaseNetwork>
   );
 }
 
