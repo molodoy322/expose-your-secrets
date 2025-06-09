@@ -418,11 +418,12 @@ export default function AchievementsTab({
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
       style={{
-        width: "calc(100% - 40px)",
-        margin: "0 auto",
+        width: "100%",
+        maxWidth: "100vw",
+        margin: "0",
         padding: "20px",
         background: "rgba(36, 58, 37, 0.33)",
-        borderRadius: 26,
+        borderRadius: "26px",
         border: "2px solid #21EF6E",
         boxShadow: "0 0 32px 0 #21ef6e15, 0 0 0 4px #FFD60009",
         backdropFilter: "blur(19px)",
@@ -431,7 +432,10 @@ export default function AchievementsTab({
         color: "#fff",
         fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
         overflowX: "hidden",
-        boxSizing: "border-box"
+        boxSizing: "border-box",
+        position: "relative",
+        left: "0",
+        right: "0"
       }}
     >
       {error && (
@@ -547,7 +551,9 @@ export default function AchievementsTab({
         gap: "10px",
         marginBottom: "30px",
         width: "100%",
-        boxSizing: "border-box"
+        maxWidth: "100%",
+        boxSizing: "border-box",
+        overflowX: "hidden"
       }}>
         {achievements.map((category) => (
           <motion.button
@@ -610,11 +616,13 @@ export default function AchievementsTab({
             
             <div style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
               gap: "15px",
               marginBottom: "20px",
               width: "100%",
-              boxSizing: "border-box"
+              maxWidth: "100%",
+              boxSizing: "border-box",
+              overflowX: "hidden"
             }}>
               {activeCategoryData.achievements.map((achievement) => (
                 <motion.div
