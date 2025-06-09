@@ -115,6 +115,7 @@ export default function HomeTab({
   refetchSecrets,
   info,
 }: HomeTabProps) {
+  const [activeTab, setActiveTab] = useState<'latest' | 'top'>('latest');
 
   // Додаєш тут
   const todayStart = new Date();
@@ -378,11 +379,9 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
     fetchNextPage();
   }, 1000);
 
-  // --- Додаємо стейт для табів ---
-  const [activeTab, setActiveTab] = useState<'latest' | 'top'>('latest');
+  // --- Слідкуємо за розміром екрану ---
   const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth <= 768);
 
-  // --- Слідкуємо за розміром екрану ---
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -392,49 +391,95 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
   }, []);
 
   return (
-    <div className="flex flex-col items-center w-full max-w-[420px] mx-auto px-4">
-      {/* Логотип */}
-      <div className="flex items-center justify-center gap-2 mb-8">
-        <span className="text-3xl font-bold bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] bg-clip-text text-transparent">
-          Expose Your Secrets
-        </span>
-      </div>
-
-      {/* Форма для секрета */}
-      <div className="w-full">
-        <h2 className="text-xl font-semibold mb-4 text-center">Share your secret</h2>
-        
+    <div className="w-full max-w-[400px] mx-auto px-4">
+      {/* Форма додавання секрету */}
+      <div className="w-full mb-4">
+        <h2 className="text-xl font-bold mb-3">Share your secret</h2>
         <textarea
           value={secret}
           onChange={(e) => setSecret(e.target.value)}
           placeholder="Write your secret here..."
-          className="w-full min-h-[120px] p-4 rounded-xl bg-[#181A20] border border-[#21EF6E33] text-white mb-4 focus:outline-none focus:border-[#21EF6E] transition-all duration-200"
+          className="w-full min-h-[120px] p-4 rounded-lg bg-gray-800/90 border border-gray-700 text-base mb-3"
         />
-
         <button
           onClick={submitSecret}
           disabled={submitDisabled}
-          className="w-full h-12 rounded-xl font-bold text-lg bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white shadow-lg hover:opacity-90 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          className={`w-full h-12 rounded-lg font-semibold text-base transition-all duration-200 ${
+            submitDisabled 
+              ? 'bg-gray-700 text-gray-400 cursor-not-allowed' 
+              : 'bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white hover:opacity-90'
+          }`}
         >
           Post Secret (0.00001 ETH)
         </button>
       </div>
 
-      {/* Список секретов */}
-      <div className="w-full mt-8">
-        <AnimatePresence>
-          {latestSecrets.map((s, idx) => (
+      {/* Перемикач Latest/Top */}
+      <div className="flex w-full mb-4">
+        <button
+          onClick={() => setActiveTab('latest')}
+          className={`w-1/2 py-3 text-base font-semibold rounded-l-lg transition-all duration-200 ${
+            activeTab === 'latest'
+              ? 'bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white'
+              : 'bg-gray-800/90 text-gray-400'
+          }`}
+        >
+          Latest
+        </button>
+        <button
+          onClick={() => setActiveTab('top')}
+          className={`w-1/2 py-3 text-base font-semibold rounded-r-lg transition-all duration-200 ${
+            activeTab === 'top'
+              ? 'bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white'
+              : 'bg-gray-800/90 text-gray-400'
+          }`}
+        >
+          Top
+        </button>
+      </div>
+
+      {/* Список секретів */}
+      <div className="space-y-3">
+        <AnimatePresence mode="wait">
+          {activeTab === 'latest' ? (
             <motion.div
-              key={s.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              ref={idx === latestSecrets.length - 1 ? lastSecretRef : null}
+              key="latest"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="space-y-3"
             >
-              {SecretCardMemo(s, s.author?.toLowerCase() === address?.toLowerCase())}
+              {latestSecrets.map((s, idx) => (
+                <motion.div
+                  key={s.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-gray-800/90 rounded-lg p-4 border border-gray-700 shadow-lg"
+                >
+                  {SecretCardMemo(s, s.author?.toLowerCase() === address?.toLowerCase(), true)}
+                </motion.div>
+              ))}
             </motion.div>
-          ))}
+          ) : (
+            <motion.div
+              key="top"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="space-y-3"
+            >
+              {topSecrets.map((s, idx) => (
+                <motion.div
+                  key={s.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-gray-800/90 rounded-lg p-4 border border-gray-700 shadow-lg"
+                >
+                  {SecretCardMemo(s, s.author?.toLowerCase() === address?.toLowerCase(), true)}
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
         </AnimatePresence>
       </div>
     </div>
