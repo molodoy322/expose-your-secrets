@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useChainId } from 'wagmi';
@@ -9,7 +10,24 @@ import {
   getMintPrice,
   getAchievementInfo
 } from './lib/achievementNFT';
-import { base } from 'wagmi/chains';
+
+const baseChain = {
+  id: 8453,
+  name: 'Base',
+  network: 'base',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'Ether',
+    symbol: 'ETH',
+  },
+  rpcUrls: {
+    default: { http: ['https://mainnet.base.org'] },
+    public: { http: ['https://mainnet.base.org'] },
+  },
+  blockExplorers: {
+    default: { name: 'Basescan', url: 'https://basescan.org' },
+  },
+} as const;
 
 interface Achievement {
   id: string;
@@ -260,7 +278,7 @@ export default function AchievementsTab({
         ],
         value: mintPrice,
         account: address as `0x${string}`,
-        chain: base
+        chain: baseChain
       });
     } catch (error) {
       console.error('Error minting achievement:', error);
@@ -336,7 +354,7 @@ export default function AchievementsTab({
     try {
       await window.frame.sdk.actions.post({
         text: `🎉 I just earned the "${achievement.title}" achievement in Expose Your Secrets!\n\n${achievement.description}\n\nReward: ${achievement.reward}`,
-        embeds: achievement.nftImage ? [{ url: achievement.nftImage }] : []
+        image: achievement.nftImage || "https://expose-your-secrets.vercel.app/og.png"
       });
     } catch (error) {
       console.error('Failed to share to Farcaster:', error);
