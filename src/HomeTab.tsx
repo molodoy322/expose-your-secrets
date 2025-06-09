@@ -328,7 +328,7 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
       <span style={{ fontSize: 32 }}>🔥</span>
     </div>
 
-    {/* КНОПКА WALLET */}
+    {/* КНОПКА WALLET — завжди показується! */}
     <button
       onClick={() => {
         if (!isConnected) connect({ connector: connectors[0] });
@@ -340,11 +340,13 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
       disabled={isConnected}
       style={{ marginTop: 0, justifyContent: "center", border: "none" }}
     >
-      {isConnected
+      {isConnected && address
         ? (
           <span>
-            <svg width="20" height="20" style={{ display: "inline", marginRight: 8, verticalAlign: "middle" }}><circle cx="10" cy="10" r="10" fill="#21EF6E" /></svg>
-            Connected{address ? `: ${address.slice(0, 6)}...${address.slice(-4)}` : ""}
+            <svg width="20" height="20" style={{ display: "inline", marginRight: 8, verticalAlign: "middle" }}>
+              <circle cx="10" cy="10" r="10" fill="#21EF6E" />
+            </svg>
+            Connected: {address.slice(0, 6)}...{address.slice(-4)}
           </span>
         )
         : "Connect Wallet"}
@@ -393,6 +395,7 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
       </button>
     </div>
 
+    {/* Інфо, таби, секрети — залишаєш як було */}
     {info && (
       <div style={{
         padding: "12px",
