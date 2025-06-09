@@ -10,6 +10,20 @@
     <meta property="og:description" content="Share your secrets anonymously on Base" />
     <meta property="og:image" content="https://expose-your-secrets.vercel.app/og.png" />
     <meta name="fc:frame" content='{"version":"next","imageUrl":"https://expose-your-secrets.vercel.app/og.png","button":{"title":"Open","action":{"type":"launch_frame","name":"Expose Your Secrets","url":"https://expose-your-secrets.vercel.app","splashImageUrl":"https://expose-your-secrets.vercel.app/vite.svg","splashBackgroundColor":"#181A20"}}}' />
+    <script type="module">
+      import { sdk as farSdk } from "@farcaster/frame-sdk";
+
+      // створимо глобальний об'єкт sdk, щоб Farcaster його бачив
+      window.sdk = {
+        actions: {
+          ready: (...args) => farSdk.actions.ready(...args),
+          addFrame: (...args) => farSdk.actions.addFrame(...args),
+          composeCast: (...args) => farSdk.actions.composeCast(...args),
+        },
+        wallet: farSdk.wallet,
+        context: farSdk.context
+      };
+    </script>
   </head>
   <body>
     <div id="root"></div>
