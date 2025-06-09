@@ -36,13 +36,18 @@ export async function initializeFarcaster() {
 
         if (window.frame?.sdk) {
           console.log('Farcaster SDK found');
-          if (typeof window.frame.sdk.ready === 'function') {
-            console.log('Farcaster SDK ready method available');
+          
+          // Проверяем наличие всех необходимых методов
+          if (typeof window.frame.sdk.ready === 'function' && 
+              window.frame.sdk.actions && 
+              typeof window.frame.sdk.actions.post === 'function') {
+            console.log('Farcaster SDK fully initialized');
+            sdkInitialized = true;
             resolve();
           } else {
-            console.log('Farcaster SDK ready method not available');
+            console.log('Waiting for Farcaster SDK methods...');
             if (attempts >= maxAttempts) {
-              reject(new Error('Farcaster SDK ready method not available after maximum attempts'));
+              reject(new Error('Farcaster SDK methods not available after maximum attempts'));
             } else {
               setTimeout(checkSDK, interval);
             }
@@ -63,7 +68,16 @@ export async function initializeFarcaster() {
 
   try {
     await waitForSDK();
-    console.log('Farcaster SDK initialized successfully');
+    
+    // Дополнительная проверка после инициализации
+    if (window.frame?.sdk?.ready) {
+      try {
+        await window.frame.sdk.ready();
+        console.log('Farcaster SDK ready method called successfully');
+      } catch (error) {
+        console.warn('Error calling Farcaster SDK ready method:', error);
+      }
+    }
     
     if (window.frame?.sdk?.actions) {
       console.log('Farcaster SDK actions available');
@@ -72,6 +86,7 @@ export async function initializeFarcaster() {
     }
   } catch (error) {
     console.error('Failed to initialize Farcaster SDK:', error);
+    throw error; // Пробрасываем ошибку дальше для обработки
   }
 }
 
