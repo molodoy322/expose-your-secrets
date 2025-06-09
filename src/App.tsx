@@ -287,10 +287,14 @@ function debounce<T extends (...args: any[]) => any>(
 }
 
 export default function App() {
-  // Инициализируем Farcaster SDK сразу
-  // useEffect(() => {
-  //   initializeFarcaster();
-  // }, []);
+  // Ініціалізуємо Farcaster SDK з невеликою затримкою, щоб дати додатку відрендеритися
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      initializeFarcaster();
+    }, 500); // 500ms затримка
+
+    return () => clearTimeout(timer);
+  }, []); // Запускаємо лише один раз після початкового рендеру
 
   const [fetchLoading, setFetchLoading] = useState(true);
   const { isConnected, address } = useAccount();
@@ -400,7 +404,7 @@ export default function App() {
             address: CONTRACT_ADDRESS,
             abi: ABI,
             functionName: "getSecret",
-            args: [i],
+            args: [BigInt(i)],
           })
         );
       }
@@ -545,7 +549,7 @@ export default function App() {
           data: encodeFunctionData({
             abi: ABI,
             functionName: "likeSecret",
-            args: [id],
+            args: [BigInt(id)],
           }),
         }],
       });
@@ -573,7 +577,7 @@ export default function App() {
           data: encodeFunctionData({
             abi: ABI,
             functionName: "boostLikes",
-            args: [id],
+            args: [BigInt(id)],
           }),
         }],
       });
@@ -597,7 +601,7 @@ export default function App() {
           data: encodeFunctionData({
             abi: ABI,
             functionName: "deleteSecret",
-            args: [id],
+            args: [BigInt(id)],
           }),
         }],
       });
@@ -642,58 +646,49 @@ export default function App() {
   };
 
   return (
-    // <RequireBaseNetwork>
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 20px" }}>
-        {!isConnected ? (
-          <div className="connect-wallet">
-            <h2>Connect your wallet to continue</h2>
-            <p>Please connect your wallet to use Expose Your Secrets</p>
-          </div>
-        ) : (
-          <div style={{
-            paddingTop: 30,
-            paddingLeft: 30,
-            paddingRight: 30,
-            paddingBottom: 90,
-            textAlign: "center",
-            minHeight: "100vh",
-            background: "linear-gradient(120deg, #181A20 0%, #23243a 100%)",
-            color: "#fff"
+    <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 20px" }}>
+      <div style={{
+          paddingTop: 30,
+          paddingLeft: 30,
+          paddingRight: 30,
+          paddingBottom: 90,
+          textAlign: "center",
+          minHeight: "100vh",
+          background: "linear-gradient(120deg, #181A20 0%, #23243a 100%)",
+          color: "#fff"
+        }}>
+          <h1 style={{
+            fontSize: "2.7rem",
+            marginBottom: 16,
+            background: "linear-gradient(90deg, #21EF6E, #FF2D55)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            fontWeight: 800,
+            letterSpacing: "1.3px"
           }}>
-            <h1 style={{
-              fontSize: "2.7rem",
-              marginBottom: 16,
-              background: "linear-gradient(90deg, #21EF6E, #FF2D55)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              fontWeight: 800,
-              letterSpacing: "1.3px"
-            }}>
-              🔥 Expose Your Secrets 🔥
-            </h1>
+            🔥 Expose Your Secrets 🔥
+          </h1>
 
-            {activeTab === "home" && <HomeTab {...homeTabProps} />}
-            {activeTab === "profile" && <ProfileTab {...profileTabProps} />}
-            {activeTab === "gm" && <GmTab secrets={secrets} onStreakUpdate={handleStreakUpdate} />}
-            {activeTab === "achievements" && (
-              <AchievementsTab
-                address={address}
-                totalLikesGiven={totalLikesGiven}
-                totalPosts={totalPosts}
-                totalLikesReceived={totalLikesReceived}
-                streak={currentStreak}
-              />
-            )}
-            {activeTab === "help" && <HelpTab />}
-            <BottomNav
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              hasNewProfile={hasNewProfile}
+          {activeTab === "home" && <HomeTab {...homeTabProps} />}
+          {activeTab === "profile" && <ProfileTab {...profileTabProps} />}
+          {activeTab === "gm" && <GmTab secrets={secrets} onStreakUpdate={handleStreakUpdate} />}
+          {activeTab === "achievements" && (
+            <AchievementsTab
+              address={address}
+              totalLikesGiven={totalLikesGiven}
+              totalPosts={totalPosts}
+              totalLikesReceived={totalLikesReceived}
+              streak={currentStreak}
             />
-          </div>
-        )}
-      </div>
-    // </RequireBaseNetwork>
+          )}
+          {activeTab === "help" && <HelpTab />}
+          <BottomNav
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            hasNewProfile={hasNewProfile}
+          />
+        </div>
+    </div>
   );
 }
 

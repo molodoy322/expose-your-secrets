@@ -12,7 +12,7 @@ import {
   CHAIN_ID,
   MIN_TIME_BETWEEN_CHECKINS
 } from "./lib/gmContract";
-import { publicClient } from "./lib/wagmi";
+import { publicClient } from "./lib/contract";
 
 interface GmTabProps {
   secrets: any[];

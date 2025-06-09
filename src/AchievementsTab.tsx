@@ -331,10 +331,10 @@ export default function AchievementsTab({
 
   // Функция для шаринга в Farcaster
   const shareToFarcaster = async (achievement: Achievement) => {
-    if (!window.frame) return;
+    if (!window.frame || !window.frame.sdk || !window.frame.sdk.actions) return;
     
     try {
-      await window.frame.post({
+      await window.frame.sdk.actions.post({
         text: `🎉 I just earned the "${achievement.title}" achievement in Expose Your Secrets!\n\n${achievement.description}\n\nReward: ${achievement.reward}`,
         embeds: achievement.nftImage ? [{ url: achievement.nftImage }] : []
       });

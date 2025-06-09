@@ -3,12 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CONTRACT_ADDRESS, ABI } from "./lib/contract";
 import { encodeFunctionData } from "viem";
 
-declare global {
-  interface Window {
-    frame: any;
-  }
-}
-
 interface ProfileTabProps {
   address: string | undefined;
   mySecrets: any[];

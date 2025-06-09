@@ -1,19 +1,42 @@
-import { AuthKitConfig } from '@farcaster/auth-kit'
+/// <reference types="vite/client" />
 
-export const farcasterConfig: AuthKitConfig = {
+const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://expose-your-secrets.vercel.app';
+
+export const farcasterConfig = {
   relay: 'https://relay.farcaster.xyz',
   rpcUrl: 'https://base-mainnet.infura.io/v3/9010eab5407747c68ac69b02ffee4255',
-  domain: 'expose-your-secrets.vercel.app',
-  siweUri: 'https://expose-your-secrets.vercel.app'
+  domain: currentOrigin,
+  siweUri: currentOrigin
 }
 
+let sdkInitialized = false;
+
 export async function initializeFarcaster() {
+  if (sdkInitialized) return;
+
   try {
-    if (window.frame && window.frame.sdk) {
-      window.frame.sdk.ready();
-      console.log('Farcaster SDK is ready');
+    // Ждем загрузки SDK
+    if (typeof window !== 'undefined' && !window.frame?.sdk) {
+      await new Promise((resolve) => {
+        const checkSDK = () => {
+          if (window.frame?.sdk) {
+            resolve(true);
+          } else {
+            setTimeout(checkSDK, 100);
+          }
+        };
+        checkSDK();
+      });
     }
-    console.log('Farcaster initialized successfully');
+
+    // Инициализируем SDK
+    if (window.frame?.sdk) {
+      await window.frame.sdk.ready();
+      sdkInitialized = true;
+      console.log('Farcaster SDK initialized successfully');
+    } else {
+      console.warn('Farcaster SDK not available');
+    }
   } catch (error) {
     console.error('Failed to initialize Farcaster:', error);
   }
@@ -21,10 +44,14 @@ export async function initializeFarcaster() {
 
 export async function shareToFarcaster(text: string, imageUrl?: string) {
   try {
-    if (window.frame && window.frame.sdk && window.frame.sdk.actions) {
+    if (!sdkInitialized) {
+      await initializeFarcaster();
+    }
+
+    if (window.frame?.sdk?.actions) {
       await window.frame.sdk.actions.post({
         title: "Expose Your Secrets",
-        image: imageUrl || "https://placehold.co/900x600.png?text=Secret+Shared",
+        image: imageUrl || "https://expose-your-secrets.vercel.app/og.png",
         buttons: [
           {
             label: "View Secret",
@@ -40,7 +67,6 @@ export async function shareToFarcaster(text: string, imageUrl?: string) {
       console.log('Successfully shared to Farcaster');
     } else {
       console.warn('Farcaster SDK or actions not available for sharing.');
-      // Fallback for development or environments without Farcaster Frame context
       if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
         alert("Шеринг в Farcaster работает только на публичном домене. При разработке на localhost эта функция недоступна.");
       } else {

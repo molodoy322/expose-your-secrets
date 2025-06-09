@@ -5,14 +5,15 @@
   "external_url": "https://expose-your-secrets.vercel.app",
   "frame": {
     "version": "next",
+    "name": "Expose Your Secrets",
+    "homeUrl": "https://expose-your-secrets.vercel.app",
+    "iconUrl": "https://expose-your-secrets.vercel.app/vite.svg",
     "imageUrl": "https://expose-your-secrets.vercel.app/og.png",
-    "button": {
-      "title": "Open",
-      "action": {
-        "type": "launch_frame",
-        "name": "Expose Your Secrets",
-        "url": "https://expose-your-secrets.vercel.app"
-      }
-    }
+    "screenshotUrls": ["https://expose-your-secrets.vercel.app/og.png"],
+    "tags": ["base", "secrets", "social"],
+    "primaryCategory": "social",
+    "buttonTitle": "Open",
+    "splashImageUrl": "https://expose-your-secrets.vercel.app/vite.svg",
+    "splashBackgroundColor": "#181A20"
   }
 }
