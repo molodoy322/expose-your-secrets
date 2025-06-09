@@ -234,51 +234,73 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
       >
         {/* Лого + нік у верхньому правому куті */}
         <div style={{
-          position: 'absolute', top: 14, right: 14, display: 'flex', alignItems: 'center', gap: 7
+          position: 'absolute',
+          top: 8, right: 12,
+          display: 'flex', alignItems: 'center', gap: 4
         }}>
           <img
             src={getAvatarUrl(s.author)}
             alt="avatar"
-            style={{ width: 28, height: 28, borderRadius: 9, boxShadow: "0 0 8px #21EF6E80" }}
+            style={{
+              width: 18,
+              height: 18,
+              borderRadius: 5,
+              boxShadow: "0 0 4px #21EF6E55"
+            }}
           />
           <span style={{
             fontWeight: 700,
-            fontSize: 15,
+            fontSize: 11,
             color: "#21EF6E",
-            background: "#161616AA",
-            borderRadius: 6,
-            padding: "3px 10px"
+            background: "#181A20cc",
+            borderRadius: 3,
+            padding: "1px 7px"
           }}>
             {getAnonNick(s.author)}
           </span>
         </div>
 
-        {/* Текст секрету */}
-        <div className="text-lg italic mb-6 text-white" style={{ minHeight: 28 }}>
+        {/* Текст секрету — максимально багато простору! */}
+        <div
+          className="text-base italic text-white"
+          style={{
+            minHeight: 48,
+            marginTop: 7,
+            marginBottom: 30,
+            paddingRight: 90, // щоб нік не залазив на текст
+            wordBreak: "break-word"
+          }}
+        >
           {s.text}
         </div>
 
-        {/* Нижній блок з Like / Super Like / Кількість лайків */}
-        <div className="flex flex-row items-center gap-3 mt-2 w-full">
+        {/* Функціонал внизу */}
+        <div
+          className="flex flex-row items-center gap-4 w-full"
+          style={{
+            justifyContent: "flex-start",
+            marginTop: "auto",
+            position: "absolute",
+            left: 18,
+            bottom: 12
+          }}
+        >
           <button
             onClick={() => likeSecret(s.id)}
             disabled={!isConnected || loading}
             style={{
-              background: "#161616",
+              background: "#181A20",
               border: "2px solid #21EF6E",
-              borderRadius: 12,
-              padding: "7px 18px",
+              borderRadius: 999,
+              padding: "4px 13px",
               fontWeight: 700,
               color: "#21EF6E",
-              fontSize: 16,
-              display: "flex",
-              alignItems: "center",
-              gap: 7,
-              boxShadow: "0 0 8px #21ef6e30",
+              fontSize: 17,
+              boxShadow: "0 0 4px #21ef6e30",
               opacity: !isConnected || loading ? 0.5 : 1
             }}
           >
-            ❤️ <span style={{ fontWeight: 700 }}>{Number(s.likes)}</span>
+            ❤️
           </button>
 
           <button
@@ -288,21 +310,32 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
               background: "linear-gradient(90deg, #fff 65%, #FFD600 100%)",
               color: "#23243a",
               fontWeight: 900,
-              fontSize: 18,
-              borderRadius: 13,
-              padding: "7px 18px",
-              marginLeft: 8,
-              boxShadow: "0 4px 16px #FFD60050",
+              fontSize: 14,
+              borderRadius: 999,
+              padding: "4px 13px",
+              boxShadow: "0 2px 12px #FFD60050",
               border: "none",
               display: "flex",
               alignItems: "center",
-              gap: 9,
+              gap: 7,
               opacity: !isConnected || loading ? 0.7 : 1
             }}
             title="Super Like = +100 Likes (0.0001 ETH)"
           >
-            🚀 <span>Super Like (100)</span>
+            🚀 <span style={{ fontWeight: 700 }}>Super Like</span>
           </button>
+
+          <span style={{
+            marginLeft: 10,
+            fontWeight: 800,
+            fontSize: 17,
+            color: "#FFD600",
+            background: "#181A20dd",
+            borderRadius: 8,
+            padding: "3px 13px"
+          }}>
+            {Number(s.likes)}
+          </span>
         </div>
       </Card>
     );
