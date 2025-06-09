@@ -1,7 +1,13 @@
-import { createPublicClient, http } from 'viem';
-import { base, baseSepolia } from 'viem/chains';
+import { http, createConfig } from 'wagmi'
+import { base } from 'wagmi/chains'
+import { farcasterFrame as miniAppConnector } from '@farcaster/frame-wagmi-connector'
 
-export const publicClient = createPublicClient({
-  chain: baseSepolia,
-  transport: http()
-}); 
+export const config = createConfig({
+  chains: [base],
+  transports: {
+    [base.id]: http(),
+  },
+  connectors: [
+    miniAppConnector()
+  ]
+}) 

@@ -1,4 +1,5 @@
 import { useAccount, useConnect, useDisconnect } from "wagmi";
+import { useNetwork, useSwitchNetwork } from 'wagmi/hooks';
 import { useState, useEffect, useCallback } from "react";
 import { CONTRACT_ADDRESS, ABI, publicClient } from "./lib/contract";
 import { encodeFunctionData } from "viem";
@@ -9,6 +10,8 @@ import AchievementsTab from "./AchievementsTab";
 import HelpTab from "./HelpTab";
 import BottomNav from "./BottomNav";
 import { useInfiniteQuery } from '@tanstack/react-query';
+import { initializeFarcaster } from "./lib/farcaster";
+import { base } from 'wagmi/chains';
 
 declare global { interface Window { ethereum?: any } }
 
@@ -50,6 +53,8 @@ function loadProfileState(address: string | undefined): {id: number, likes: numb
 const BASE_CHAIN_ID = 8453;
 
 function RequireBaseNetwork({ children }: { children: React.ReactNode }) {
+  const { chain } = useNetwork();
+  const { switchNetwork } = useSwitchNetwork();
   const [isCorrectNetwork, setIsCorrectNetwork] = useState(true);
 
   useEffect(() => {
@@ -285,17 +290,18 @@ function debounce<T extends (...args: any[]) => any>(
 }
 
 export default function App() {
+  // Инициализируем Farcaster SDK сразу
+  useEffect(() => {
+    initializeFarcaster();
+  }, []);
+
   const [fetchLoading, setFetchLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { address, isConnected } = useAccount();
-  const isAdmin = address?.toLowerCase() === ADMIN_ADDRESS.toLowerCase();
+  const { isConnected, address } = useAccount();
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
-
-  const [secret, setSecret] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [info, setInfo] = useState("");
   const [activeTab, setActiveTab] = useState<"home" | "profile" | "gm" | "achievements" | "help">("home");
+  const [secret, setSecret] = useState("");
+  const [info, setInfo] = useState("");
   const [hasNewProfile, setHasNewProfile] = useState(false);
   const [page, setPage] = useState(1);
   const [secrets, setSecrets] = useState<Secret[]>([]);
@@ -501,7 +507,7 @@ export default function App() {
   // --- Функція додавання секрету ---
   async function submitSecret() {
     if (!secret.trim()) return setInfo("Please enter your secret!");
-    setIsSubmitting(true);
+    setFetchLoading(true);
     try {
       const [from] = await window.ethereum.request({ method: "eth_requestAccounts" });
       await window.ethereum.request({
@@ -524,10 +530,11 @@ export default function App() {
     } catch (e: any) {
       setInfo(parseError(e));
     }
-    setIsSubmitting(false);
+    setFetchLoading(false);
   }
 
   // --- Функція лайка ---
+  const [loading, setLoading] = useState(false);
   async function likeSecret(id: number) {
     setLoading(true);
     try {
@@ -614,10 +621,10 @@ export default function App() {
     disconnect,
     secret,
     setSecret,
-    loading: isSubmitting,
+    loading: fetchLoading,
     boostLikes,
     info,
-    isAdmin,
+    isAdmin: address?.toLowerCase() === ADMIN_ADDRESS.toLowerCase(),
     deleteSecret,
     secrets: visibleSecrets,
     prevSecrets: secrets,
@@ -640,9 +647,10 @@ export default function App() {
   return (
     <RequireBaseNetwork>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 20px" }}>
-        {loading ? (
-          <div style={{ textAlign: "center", marginTop: 40 }}>
-            <div style={{ fontSize: "1.2rem", color: "#666" }}>Loading secrets...</div>
+        {!isConnected ? (
+          <div className="connect-wallet">
+            <h2>Connect your wallet to continue</h2>
+            <p>Please connect your wallet to use Expose Your Secrets</p>
           </div>
         ) : (
           <div style={{

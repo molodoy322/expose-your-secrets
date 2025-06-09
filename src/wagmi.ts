@@ -1,14 +1,16 @@
 import { http, createConfig } from "wagmi";
 import { base } from "wagmi/chains";
-import { injected } from "wagmi/connectors";
+import { farcasterFrame as miniAppConnector } from "@farcaster/frame-wagmi-connector";
 
 // Використовуємо тільки mainnet Base!
 export const config = createConfig({
   chains: [base],
-  connectors: [injected()],
   transports: {
     [base.id]: http(),
   },
+  connectors: [
+    miniAppConnector()
+  ]
 });
 
 declare module "wagmi" {

@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getUserStats } from "./lib/contract";
+import { shareToFarcaster } from './lib/farcaster';
 
 
 
@@ -111,6 +112,7 @@ export default function HomeTab({
   hasNextPage,
   isFetchingNextPage,
   refetchSecrets,
+  info,
 }: HomeTabProps) {
 
   // Додаєш тут
@@ -370,6 +372,61 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
   // --- Infinite scroll refs ---
   const observer = useRef<IntersectionObserver | null>(null);
   const lastSecretRef = useRef<HTMLLIElement | null>(null);
+
+  async function submitSecret() {
+    if (!secret.trim()) return setInfo("Please enter your secret!");
+    setIsSubmitting(true);
+    try {
+      const [from] = await window.ethereum.request({ method: "eth_requestAccounts" });
+      await window.ethereum.request({
+        method: "eth_sendTransaction",
+        params: [{
+          from,
+          to: CONTRACT_ADDRESS,
+          value: "0x" + (100000000000000).toString(16),
+          data: encodeFunctionData({
+            abi: ABI,
+            functionName: "addSecret",
+            args: [secret],
+          }),
+        }],
+      });
+      
+      // Добавляем кнопку шаринга после успешного постинга
+      const shareButton = document.createElement('button');
+      shareButton.textContent = '🤫 Share on Farcaster';
+      shareButton.style.cssText = `
+        background: linear-gradient(90deg, #21EF6E, #FF2D55);
+        border: none;
+        color: #23243a;
+        padding: 10px 20px;
+        border-radius: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: transform 0.2s;
+      `;
+      shareButton.onclick = () => {
+        shareToFarcaster(
+          `🤫 I just shared a secret on Expose Your Secrets!\n\n${secret}\n\nShare your secrets too: https://expose-your-secrets.vercel.app`,
+          'https://expose-your-secrets.vercel.app/og.png'
+        );
+      };
+      
+      const infoElement = document.querySelector('.info-message');
+      if (infoElement) {
+        infoElement.appendChild(shareButton);
+      }
+      
+      setInfo("Your secret has been added!");
+      setSecret("");
+      await fetchSecrets();
+      updateStats();
+    } catch (e: any) {
+      setInfo(parseError(e));
+    }
+    setIsSubmitting(false);
+  }
 
   return (
     <>
@@ -722,6 +779,44 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
           }
         `}
       </style>
+
+      {info && (
+        <div className="info-message" style={{
+          background: "rgba(33, 239, 110, 0.1)",
+          border: "1px solid #21EF6E",
+          borderRadius: 12,
+          padding: "12px 20px",
+          marginBottom: 20,
+          color: "#21EF6E",
+          fontSize: 14,
+          fontWeight: 600
+        }}>
+          {info}
+          {info === "Your secret has been added!" && (
+            <button
+              onClick={() => shareToFarcaster(
+                `🤫 I just shared a secret on Expose Your Secrets!\n\n${secret}\n\nShare your secrets too: https://expose-your-secrets.vercel.app`,
+                'https://expose-your-secrets.vercel.app/og.png'
+              )}
+              style={{
+                background: "linear-gradient(90deg, #21EF6E, #FF2D55)",
+                border: "none",
+                color: "#23243a",
+                padding: "10px 20px",
+                borderRadius: 12,
+                fontWeight: 700,
+                cursor: "pointer",
+                marginTop: 10,
+                transition: "transform 0.2s",
+                display: "block",
+                width: "100%"
+              }}
+            >
+              🤫 Share on Farcaster
+            </button>
+          )}
+        </div>
+      )}
     </>
   );
 }

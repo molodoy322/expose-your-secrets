@@ -9,6 +9,7 @@ import {
   getMintPrice,
   getAchievementInfo
 } from './lib/achievementNFT';
+import { base } from 'wagmi/chains';
 
 interface Achievement {
   id: string;
@@ -119,7 +120,7 @@ export default function AchievementsTab({
   const [selectedCategory, setSelectedCategory] = useState<string>('like-master');
   const [mintPrice, setMintPrice] = useState<bigint>(BigInt(0));
   const { isConnected } = useAccount();
-  const { chainId } = useChainId();
+  const chainId = useChainId();
 
   const { writeContract, data: hash } = useWriteContract();
   const { isLoading: isTransactionPending } = useWaitForTransactionReceipt({
@@ -257,7 +258,9 @@ export default function AchievementsTab({
           achievement.description,
           BigInt(achievement.total)
         ],
-        value: mintPrice
+        value: mintPrice,
+        account: address as `0x${string}`,
+        chain: base
       });
     } catch (error) {
       console.error('Error minting achievement:', error);
