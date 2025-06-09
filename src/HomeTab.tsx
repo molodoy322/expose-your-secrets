@@ -236,7 +236,7 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
         <div style={{
           position: "absolute",
           top: 14,
-          right: 18,
+          right: 24,
           display: "flex",
           alignItems: "center",
           gap: 5,
@@ -259,18 +259,25 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
 
         {/* Текст секрету — максимально багато простору! */}
         <div
-          className="text-base italic text-white"
-          style={{
-            minHeight: 48,
-            marginTop: 7,
-            marginBottom: 30,
-            paddingRight: 90, // щоб нік не залазив на текст
-            wordBreak: "break-word",
-            textAlign: "center"
-          }}
-        >
-          {s.text}
-        </div>
+  style={{
+    textAlign: "center",
+    marginBottom: 16,
+    fontSize: 18,
+    color: "#fff",
+    fontStyle: "italic",
+    width: "100%",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    minHeight: 54,  // або більше, якщо треба для багаторядкового тексту
+    wordBreak: "break-word",
+    lineHeight: 1.5,
+  }}
+>
+  {s.text}
+</div>
+
+           
 
         {/* Функціонал внизу */}
         <div 
@@ -314,7 +321,7 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
               alignItems: "center",
               gap: 5,
             }}
-          >🚀 <span>Super Like</span></button>
+          >🚀 <span>Super Like(+100)</span></button>
 
           {/* Лічильник */}
           <div
