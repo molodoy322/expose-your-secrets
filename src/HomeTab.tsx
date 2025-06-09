@@ -235,8 +235,8 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
         {/* Лого + нік у верхньому правому куті */}
         <div style={{
           position: "absolute",
-          top: 14,
-          right: 24,
+          top: 18,
+          right: 8,
           display: "flex",
           alignItems: "center",
           gap: 5,
