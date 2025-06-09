@@ -271,7 +271,7 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
     alignItems: "center",
     minHeight: 84,  // або більше, якщо треба для багаторядкового тексту
     wordBreak: "break-word",
-    paddingTop: 12,
+    paddingTop: 15,
     lineHeight: 1.5,
   }}
 >
