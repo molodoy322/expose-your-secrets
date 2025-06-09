@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState, useMemo, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion";
 import { getUserStats } from "./lib/contract";
 import { shareToFarcaster } from './lib/farcaster';
+import { useThrottle } from './lib/hooks';
 
 
 
@@ -373,6 +374,10 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
   const observer = useRef<IntersectionObserver | null>(null);
   const lastSecretRef = useRef<HTMLLIElement | null>(null);
 
+  const throttledFetchNextPage = useThrottle((fetchNextPage: () => void) => {
+    fetchNextPage();
+  }, 1000);
+
   return (
     <>
       {/* Кнопка connect/disconnect */}
@@ -417,133 +422,86 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
         borderRadius: 6
       }} />
 
-      <h3 style={{ fontSize: "1.6rem", letterSpacing: "0.8px" }}>
-        Share your secret anonymously (0.25 cents in ETH)
-      </h3>
-      <textarea
-        value={secret}
-        onChange={e => setSecret(e.target.value)}
-        maxLength={450}
-        rows={5}
+      {/* Форма добавления секрета */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="card"
         style={{
-          width: "100%",
-          maxWidth: 500,
-          fontSize: 18,
-          borderRadius: 13,
-          marginTop: 12,
-          padding: 14,
-          background: "#23243a",
-          color: "#fff",
-          border: "2px solid #21EF6E",
-          outline: "none",
-        }}
-        placeholder="Type your secret here..."
-        disabled={!isConnected || loading}
-      />
-      <div style={{ textAlign: "right", marginRight: 8, color: secret.length > 440 ? "#FF2D55" : "#888", fontSize: 16 }}>
-  {secret.length} / 450
-</div>
-      <br />
-
-      {/* --- User stats widget --- */}
-<div
-  style={{
-    background: "none",
-    paddingTop: 2,
-    paddingBottom: 2,
-    marginTop: -42,     // трохи підняти ВГОРУ, якщо треба ще вище — зроби -60...
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 30,
-  }}
->
-  <div
-    style={{
-      background: "linear-gradient(90deg, #23243a 80%, #1a1b22 100%)",
-      border: "2.2px solid #21EF6E",
-      borderRadius: 14,
-      padding: "18px 26px",
-      minWidth: 130,
-      textAlign: "center",
-      fontWeight: 800,
-      fontSize: 18,
-      color: "#21EF6E",
-      boxShadow: "0 0 12px 2px #21ef6e33",
-      letterSpacing: "0.6px",
-    }}
-  >
-    Posts Today<br />
-    <span style={{ fontSize: 34, color: "#fff", fontWeight: 900 }}>{postsToday}</span>
-    <span style={{ fontSize: 16, color: "#aaa", fontWeight: 700 }}> / 3</span>
-  </div>
-  <div
-    style={{
-      background: "linear-gradient(90deg, #23243a 80%, #1a1b22 100%)",
-      border: "2.2px solid #FF2D55",
-      borderRadius: 14,
-      padding: "18px 26px",
-      minWidth: 130,
-      textAlign: "center",
-      fontWeight: 800,
-      fontSize: 18,
-      color: "#FF2D55",
-      boxShadow: "0 0 12px 2px #ff2d5533",
-      letterSpacing: "0.6px",
-    }}
-  >
-    Likes Today<br />
-    <span style={{ fontSize: 34, color: "#fff", fontWeight: 900 }}>{likesToday}</span>
-    <span style={{ fontSize: 16, color: "#aaa", fontWeight: 700 }}> / 15</span>
-  </div>
-</div>
-  
-
-
-      <button
-        onClick={submitSecret}
-        disabled={submitDisabled}
-        style={{
-          ...btnStyle,
-          marginRight: 14,
-          marginTop: 14,
-          opacity: submitDisabled ? 0.55 : 1,
-          background: submitDisabled ? "#22252a" : "#161616",
-          color: submitDisabled ? "#aaa" : "#fff",
-          border: submitDisabled ? "2px solid #343a40" : "2px solid #21EF6E",
-          boxShadow: submitDisabled ? "none" : "0 0 10px #21ef6e55",
-          cursor: submitDisabled ? "not-allowed" : "pointer"
+          maxWidth: "600px",
+          margin: "0 auto var(--spacing-lg)",
+          padding: "var(--spacing-md)"
         }}
       >
-        Drop a Secret (0.00001 ETH)
-        <span style={{ fontSize: 27, marginLeft: 7 }}>🤫💬</span>
-      </button>
+        <textarea
+          value={secret}
+          onChange={(e) => setSecret(e.target.value)}
+          placeholder="Share your secret anonymously..."
+          style={{
+            width: "100%",
+            minHeight: "100px",
+            padding: "var(--spacing-sm)",
+            borderRadius: "var(--border-radius)",
+            background: "rgba(34,36,58,0.66)",
+            border: "1px solid var(--primary-color)",
+            color: "var(--text-color)",
+            fontSize: "1rem",
+            resize: "vertical",
+            marginBottom: "var(--spacing-sm)"
+          }}
+        />
+
+        <div className="flex gap-sm" style={{ flexWrap: "wrap" }}>
+          <button
+            onClick={submitSecret}
+            disabled={submitDisabled}
+            className="button"
+            style={{
+              flex: "1",
+              minWidth: "200px",
+              opacity: submitDisabled ? 0.55 : 1,
+              background: submitDisabled ? "var(--background-dark)" : "var(--background-light)",
+              color: submitDisabled ? "var(--text-muted)" : "var(--text-color)",
+              border: submitDisabled ? "2px solid #343a40" : "2px solid var(--primary-color)",
+              boxShadow: submitDisabled ? "none" : "0 0 10px var(--primary-color)"
+            }}
+          >
+            Drop a Secret (0.00001 ETH)
+            <span style={{ fontSize: "1.5rem", marginLeft: "var(--spacing-xs)" }}>🤫💬</span>
+          </button>
+        </div>
+      </motion.div>
 
       <hr style={{
-        margin: "30px 0",
+        margin: "var(--spacing-lg) 0",
         border: "none",
-        height: 2,
-        background: "linear-gradient(90deg, #21EF6E 0%, #FF2D55 100%)",
-        borderRadius: 6
+        height: "2px",
+        background: "linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%)",
+        borderRadius: "6px"
       }} />
 
-      {/* --- Дві колонки + розділювач --- */}
-      <div style={{ display: "flex", justifyContent: "center", gap: 120, alignItems: "flex-start", position: "relative" }}>
-        {/* Latest */}
-        <div style={{ flex: 1, minWidth: 340, marginRight: 40 }}>
+      {/* Основной контент */}
+      <div className="grid" style={{
+        gridTemplateColumns: "1fr",
+        gap: "var(--spacing-lg)"
+      }}>
+        {/* Latest Secrets */}
+        <div>
           <h2 style={{
-            marginTop: -10,
-            fontSize: "2.1rem",
-            marginBottom: 10,
-            background: "linear-gradient(90deg, #21EF6E 0%, #FF2D55 100%)",
+            fontSize: "clamp(1.5rem, 4vw, 2.1rem)",
+            marginBottom: "var(--spacing-sm)",
+            background: "linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%)",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             fontWeight: 800,
             letterSpacing: "0.8px"
-          }}>Latest Secrets</h2>
-          <ul style={{ listStyle: "none", padding: 0, maxWidth: 420, margin: "0 auto" }}>
+          }}>
+            Latest Secrets
+          </h2>
+          <ul style={{ listStyle: "none", padding: 0, margin: "0 auto" }}>
             {latestSecrets.length === 0 && (
-              <li style={{ color: "#888", fontStyle: "italic" }}>No secrets yet. Be the first!</li>
+              <li style={{ color: "var(--text-muted)", fontStyle: "italic" }}>No secrets yet. Be the first!</li>
             )}
             <AnimatePresence>
               {latestSecrets.map((s, idx) => {
@@ -551,191 +509,67 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
                 const ref = idx === latestSecrets.length - 1 ? lastSecretRef : undefined;
                 return (
                   <motion.li
-                    ref={ref}
                     key={s.id}
+                    ref={ref}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
+                    transition={{ duration: 0.3, delay: idx * 0.1 }}
                     style={{
-                      ...cardStyle,
-                      ...getMyStyle(isMine),
-                      position: "relative",
-                      zIndex: 1,
-                      overflow: "hidden",
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "space-between",
-                      minHeight: 180,
+                      marginBottom: "var(--spacing-md)"
                     }}
                   >
-                    {SecretCardMemo(s, isMine, true)}
+                    {SecretCardMemo(s, isMine)}
                   </motion.li>
                 );
               })}
             </AnimatePresence>
           </ul>
-          {isFetchingNextPage && (
-            <div style={{ 
-              color: '#21EF6E', 
-              margin: 12,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 8
-            }}>
-              <span style={{ animation: 'spin360 1s linear infinite' }}>🔄</span>
-              Loading more secrets...
+
+          {/* Load More Button */}
+          {hasNextPage && (
+            <div style={{ textAlign: "center", marginTop: "var(--spacing-md)" }}>
+              <button
+                onClick={() => throttledFetchNextPage(fetchNextPage)}
+                disabled={isFetchingNextPage}
+                className="button"
+                style={{
+                  background: "var(--background-light)",
+                  color: "var(--text-color)",
+                  border: "2px solid var(--primary-color)",
+                  opacity: isFetchingNextPage ? 0.7 : 1
+                }}
+              >
+                {isFetchingNextPage ? (
+                  <>
+                    <span style={{ animation: "spin360 1s linear infinite" }}>🔄</span>
+                    Loading more secrets...
+                  </>
+                ) : (
+                  "Load More"
+                )}
+              </button>
             </div>
           )}
         </div>
-
-        {/* REFRESH BUTTON по центру над лінією */}
-        <div style={{ position: "absolute", left: "50%", top: -20, transform: "translateX(-50%)", zIndex: 10 }}>
-          <button
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            style={{
-              padding: "12px 32px",
-              background: "#23243a",
-              color: "#e4e6ef",
-              border: isRefreshing ? "2px solid #9056FF" : "2px solid #21EF6E",
-              borderRadius: 14,
-              fontWeight: 700,
-              fontSize: 18,
-              boxShadow: isRefreshing ? "0 0 16px #9056FF33" : "0 2px 14px #21ef6e22",
-              cursor: isRefreshing ? "wait" : "pointer",
-              letterSpacing: 1.1,
-              minWidth: 175,
-              position: "relative",
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              filter: isRefreshing ? "brightness(0.92)" : "none",
-              justifyContent: "center",
-            }}
-          >
-            <span
-              style={{
-                display: "inline-block",
-                verticalAlign: "middle",
-                animation: isRefreshing ? "spin360 0.7s linear infinite" : "none",
-                color: isRefreshing ? "#9056FF" : "#21EF6E",
-                fontSize: 22,
-                transition: "color 0.16s"
-              }}
-            >🔄</span>
-            <span style={{
-              fontWeight: 800,
-              letterSpacing: 0.5,
-              color: isRefreshing ? "#9056FF" : "#21EF6E",
-              textShadow: isRefreshing ? "0 0 6px #9056FF55" : "none",
-              transition: "color 0.16s"
-            }}>
-              {isRefreshing ? "Refreshing..." : "REFRESH SECRETS"}
-            </span>
-          </button>
-          <style>
-            {`
-              @keyframes spin360 {
-                0% { transform: rotate(0deg);}
-                100% {transform: rotate(360deg);}
-              }
-            `}
-          </style>
-        </div>
-
-        {/* Divider */}
-        <div
-          style={{
-            width: 7,
-            height: '100%',
-            minHeight: 420,
-            position: 'absolute',
-            left: '50%',
-            top: 0,
-            transform: 'translateX(-50%)',
-            borderRadius: 16,
-            opacity: 0.9,
-            zIndex: 2,
-            background: 'linear-gradient(180deg, #21EF6E, #FFD600, #FF2D55, #9056FF, #21EF6E)',
-            backgroundSize: '100% 400%',
-            animation: 'rgb-divider-move 4s linear infinite',
-            boxShadow: '0 0 18px 4px #21EF6E33, 0 0 18px 8px #FF2D5533',
-          }}
-        />
-        <style>
-          {`
-            @keyframes rgb-divider-move {
-              0% { background-position: 0% 0%; }
-              100% { background-position: 0% 100%; }
-            }
-          `}
-        </style>
-
-        {/* Top */}
-        <div style={{ flex: 1, minWidth: 340, marginLeft: 40 }}>
-          <h2 style={{
-                marginTop: -10,
-
-            fontSize: "2.1rem",
-            marginBottom: 10,
-            background: "linear-gradient(90deg, #FF2D55 0%, #21EF6E 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            fontWeight: 800,
-            letterSpacing: "0.8px"
-          }}>Top Secrets</h2>
-          <ul style={{ listStyle: "none", padding: 0, maxWidth: 420, margin: "0 auto" }}>
-            {topSecrets.length === 0 && (
-              <li style={{ color: "#888", fontStyle: "italic" }}>No secrets yet. Be the first!</li>
-            )}
-            {topSecrets.map(s => {
-              const isMine = s.author?.toLowerCase() === address?.toLowerCase();
-              return (
-                <li
-                  key={s.id}
-                  style={{
-                    ...cardStyle,
-                    ...getMyStyle(isMine),
-                    position: "relative",
-                    zIndex: 1,
-                    overflow: "hidden",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-between",
-                    minHeight: 180,
-                  }}
-                >
-                  {SecretCardMemo(s, isMine, false)}
-                </li>
-              );
-            })}
-          </ul>
-        </div>
       </div>
-      {/* --- Додаємо keyframes для glow-ефекту прямо тут (або в index.css) --- */}
-      <style>
-        {`
-          @keyframes unicorn-glow {
-            0% { box-shadow: 0 0 18px 3px #ffd60099, 0 0 0px 0px #FFD600; }
-            50% { box-shadow: 0 0 30px 9px #FFD600, 0 0 24px 6px #ffd600cc; }
-            100% { box-shadow: 0 0 18px 3px #ffd60099, 0 0 0px 0px #FFD600; }
-          }
-        `}
-      </style>
 
+      {/* Info Message */}
       {info && (
-        <div className="info-message" style={{
-          background: "rgba(33, 239, 110, 0.1)",
-          border: "1px solid #21EF6E",
-          borderRadius: 12,
-          padding: "12px 20px",
-          marginBottom: 20,
-          color: "#21EF6E",
-          fontSize: 14,
-          fontWeight: 600
-        }}>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          className="card"
+          style={{
+            background: "rgba(33,239,110,0.1)",
+            border: "1px solid var(--primary-color)",
+            color: "var(--primary-color)",
+            fontSize: "0.875rem",
+            fontWeight: 600,
+            marginTop: "var(--spacing-md)"
+          }}
+        >
           {info}
           {info === "Your secret has been added!" && (
             <button
@@ -743,24 +577,18 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
                 `🤫 I just shared a secret on Expose Your Secrets!\n\n${secret}\n\nShare your secrets too: https://expose-your-secrets.vercel.app`,
                 'https://expose-your-secrets.vercel.app/og.png'
               )}
+              className="button"
               style={{
-                background: "linear-gradient(90deg, #21EF6E, #FF2D55)",
-                border: "none",
-                color: "#23243a",
-                padding: "10px 20px",
-                borderRadius: 12,
-                fontWeight: 700,
-                cursor: "pointer",
-                marginTop: 10,
-                transition: "transform 0.2s",
-                display: "block",
+                background: "linear-gradient(90deg, var(--primary-color), var(--secondary-color))",
+                color: "var(--background-dark)",
+                marginTop: "var(--spacing-sm)",
                 width: "100%"
               }}
             >
               🤫 Share on Farcaster
             </button>
           )}
-        </div>
+        </motion.div>
       )}
     </>
   );
