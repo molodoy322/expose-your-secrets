@@ -309,43 +309,77 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
   }, []);
 
   return (
-    <div className="flex flex-col items-center w-full max-w-[420px] mx-auto px-4">
-      {/* Header with logo and connect button */}
-      <div className="flex justify-between items-center w-full mb-6">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] bg-clip-text text-transparent">
-          🔥 Expose Your Secrets 🔥
-        </h1>
-        {!isConnected && (
-          <button
-            onClick={() => connect({ connector: connectors[0] })}
-            className="px-4 py-2 rounded-full bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white font-bold shadow-lg hover:opacity-90 transition-all duration-200"
-          >
-            Connect Wallet
-          </button>
-        )}
-      </div>
+    <div className="flex flex-col items-center w-full max-w-[420px] mx-auto px-4" style={{ gap: "16px" }}>
+      <h1 className="text-3xl font-bold bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] bg-clip-text text-transparent">
+        🔥 Expose Your Secrets 🔥
+      </h1>
 
-      {/* Share secret form */}
-      <div className="w-full mb-6">
-        <h2 className="text-xl font-semibold mb-4">Share your secret</h2>
+      {!isConnected && (
+        <button
+          onClick={() => connect({ connector: connectors[0] })}
+          style={{
+            ...btnStyle,
+            marginTop: 0,
+            width: "100%",
+            justifyContent: "center",
+            background: "linear-gradient(90deg, #21EF6E, #FF2D55)",
+            border: "none"
+          }}
+        >
+          Connect Wallet
+        </button>
+      )}
+
+      <div className="w-full" style={{ marginTop: 0 }}>
         <textarea
           value={secret}
           onChange={(e) => setSecret(e.target.value)}
-          placeholder="Write your secret here..."
-          className="w-full min-h-[120px] p-4 rounded-lg bg-[#181A20] border border-[#21EF6E33] text-white placeholder-[#666] focus:outline-none focus:border-[#21EF6E] mb-4"
+          placeholder="Share your secret..."
+          style={{
+            width: "100%",
+            minHeight: "100px",
+            padding: "12px",
+            borderRadius: "11px",
+            background: "#161616",
+            color: "#fff",
+            border: "2px solid #21EF6E",
+            fontSize: "16px",
+            resize: "none",
+            outline: "none",
+            boxShadow: "0 0 10px #21ef6e55",
+            backdropFilter: "blur(5px)",
+            WebkitBackdropFilter: "blur(5px)"
+          }}
         />
         <button
           onClick={submitSecret}
           disabled={submitDisabled}
-          className={`w-full py-3 rounded-lg font-bold text-white transition-all duration-200 ${
-            submitDisabled 
-              ? 'bg-[#333] cursor-not-allowed opacity-50' 
-              : 'bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] hover:shadow-lg'
-          }`}
+          style={{
+            ...btnStyle,
+            marginTop: "8px",
+            opacity: submitDisabled ? 0.5 : 1,
+            cursor: submitDisabled ? "not-allowed" : "pointer",
+            width: "100%",
+            justifyContent: "center"
+          }}
         >
-          Post Secret (0.00001 ETH)
+          {loading ? "Posting..." : "Post Secret"}
         </button>
       </div>
+
+      {info && (
+        <div style={{
+          padding: "12px",
+          borderRadius: "11px",
+          background: "#161616",
+          color: "#fff",
+          border: "2px solid #21EF6E",
+          fontSize: "14px",
+          textAlign: "center"
+        }}>
+          {info}
+        </div>
+      )}
 
       {/* Tab switcher */}
       <div className="flex justify-center w-full mb-6">
