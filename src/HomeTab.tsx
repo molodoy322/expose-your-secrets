@@ -411,22 +411,43 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
         </div>
       ) : (
         <>
-          <div className="card">
-            <h2>Share your secret</h2>
-            <textarea
-              value={secret}
-              onChange={(e) => setSecret(e.target.value)}
-              placeholder="Write your secret here..."
-              className="input"
-              style={{ minHeight: "100px", resize: "vertical" }}
-            />
-            <button
-              onClick={submitSecret}
-              disabled={loading}
-              className="button"
-            >
-              {loading ? "Posting..." : "Post Secret"}
-            </button>
+          <div className="flex items-center justify-center mb-8">
+            <h1 className="flex items-center gap-4 text-3xl font-bold">
+              <span>🔥</span>
+              <span className="bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] bg-clip-text text-transparent">
+                Expose Your Secrets
+              </span>
+              <span>🔥</span>
+            </h1>
+          </div>
+
+          <div className="flex justify-center w-full">
+            <div className="w-full max-w-[420px] p-4 my-5">
+              <div className="card bg-gradient-to-br from-[#23243a] to-[#1a1b22] p-4 rounded-xl border border-[#21EF6E33] shadow-lg">
+                <h2 className="text-xl font-bold mb-4 text-center">Share your secret</h2>
+                <textarea
+                  value={secret}
+                  onChange={(e) => setSecret(e.target.value)}
+                  placeholder="Write your secret here..."
+                  className="w-full min-h-[120px] p-4 rounded-xl bg-[#181A20] border border-[#21EF6E33] text-white placeholder-[#666] focus:outline-none focus:border-[#21EF6E] transition-all duration-200"
+                  style={{ resize: "vertical" }}
+                />
+                <div className="flex items-center justify-between mt-4">
+                  <span className="text-sm text-[#666]">0.00001 ETH per post</span>
+                  <button
+                    onClick={submitSecret}
+                    disabled={submitDisabled}
+                    className={`w-full h-12 px-6 rounded-xl font-semibold text-base transition-all duration-200 ${
+                      submitDisabled 
+                        ? 'bg-[#333] text-[#666] cursor-not-allowed opacity-50' 
+                        : 'bg-gradient-to-r from-[#21EF6E] to-[#1affb0] text-[#23243a] hover:opacity-90 hover:shadow-lg'
+                    }`}
+                  >
+                    {loading ? "Posting..." : "Post Secret"}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* --- Мобільний таб-перемикач --- */}
