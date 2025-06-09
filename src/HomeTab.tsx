@@ -411,30 +411,33 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
     )}
 
     {/* Tab switcher */}
-    <div className="flex justify-center w-full mb-6">
-      <div className="flex w-full max-w-[320px] bg-[#181A20] p-1 rounded-full">
-        <button
-          onClick={() => setActiveTab('latest')}
-          className={`flex-1 h-12 font-semibold text-base transition-all duration-300 ${
-            activeTab === 'latest'
-              ? 'bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white rounded-full shadow-lg'
-              : 'bg-transparent text-[#666] rounded-full hover:text-white'
-          }`}
-        >
-          Latest
-        </button>
-        <button
-          onClick={() => setActiveTab('top')}
-          className={`flex-1 h-12 font-semibold text-base transition-all duration-300 ${
-            activeTab === 'top'
-              ? 'bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white rounded-full shadow-lg'
-              : 'bg-transparent text-[#666] rounded-full hover:text-white'
-          }`}
-        >
-          Top
-        </button>
-      </div>
-    </div>
+<div className="flex justify-center w-full my-4">
+  <div className="flex w-full max-w-[320px] bg-[#181A20] p-1 rounded-full shadow">
+    <button
+      onClick={() => setActiveTab('latest')}
+      className={`flex-1 h-11 font-semibold text-base transition-all duration-300 rounded-full
+        ${activeTab === 'latest'
+          ? 'bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white shadow-lg scale-105'
+          : 'bg-transparent text-[#888] hover:text-white'
+        }`}
+      style={{ outline: "none" }}
+    >
+      Latest
+    </button>
+    <button
+      onClick={() => setActiveTab('top')}
+      className={`flex-1 h-11 font-semibold text-base transition-all duration-300 rounded-full
+        ${activeTab === 'top'
+          ? 'bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white shadow-lg scale-105'
+          : 'bg-transparent text-[#888] hover:text-white'
+        }`}
+      style={{ outline: "none" }}
+    >
+      Top
+    </button>
+  </div>
+</div>
+
 
     {/* Secrets list */}
     <div className="w-full space-y-4">
