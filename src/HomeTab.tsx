@@ -116,6 +116,8 @@ export default function HomeTab({
   info,
 }: HomeTabProps) {
   const [activeTab, setActiveTab] = useState<'latest' | 'top'>('latest');
+  const observer = useRef<IntersectionObserver | null>(null);
+  const lastSecretRef = useRef<HTMLDivElement | null>(null);
 
   // Додаєш тут
   const todayStart = new Date();
@@ -391,97 +393,122 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
   }, []);
 
   return (
-    <div className="w-full max-w-[400px] mx-auto px-4">
-      {/* Форма додавання секрету */}
-      <div className="w-full mb-4">
-        <h2 className="text-xl font-bold mb-3">Share your secret</h2>
+    <div className="flex flex-col items-center w-full max-w-[420px] mx-auto px-4">
+      {/* Header with logo and connect button */}
+      <div className="flex justify-between items-center w-full mb-6">
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] bg-clip-text text-transparent">
+          🔥 Expose Your Secrets 🔥
+        </h1>
+        {!isConnected && (
+          <button
+            onClick={() => connect({ connector: connectors[0] })}
+            className="px-4 py-2 rounded-full bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white font-bold shadow-lg hover:opacity-90 transition-all duration-200"
+          >
+            Connect Wallet
+          </button>
+        )}
+      </div>
+
+      {/* Share secret form */}
+      <div className="w-full mb-6">
+        <h2 className="text-xl font-semibold mb-4">Share your secret</h2>
         <textarea
           value={secret}
           onChange={(e) => setSecret(e.target.value)}
           placeholder="Write your secret here..."
-          className="w-full min-h-[120px] p-4 rounded-lg bg-gray-800/90 border border-gray-700 text-base mb-3"
+          className="w-full min-h-[120px] p-4 rounded-lg bg-[#181A20] border border-[#21EF6E33] text-white placeholder-[#666] focus:outline-none focus:border-[#21EF6E] mb-4"
         />
         <button
           onClick={submitSecret}
           disabled={submitDisabled}
-          className={`w-full h-12 rounded-lg font-semibold text-base transition-all duration-200 ${
+          className={`w-full py-3 rounded-lg font-bold text-white transition-all duration-200 ${
             submitDisabled 
-              ? 'bg-gray-700 text-gray-400 cursor-not-allowed' 
-              : 'bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white hover:opacity-90'
+              ? 'bg-[#333] cursor-not-allowed opacity-50' 
+              : 'bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] hover:shadow-lg'
           }`}
         >
           Post Secret (0.00001 ETH)
         </button>
       </div>
 
-      {/* Перемикач Latest/Top */}
-      <div className="flex w-full mb-4">
+      {/* Tab switcher */}
+      <div className="flex w-full mb-6">
         <button
           onClick={() => setActiveTab('latest')}
-          className={`w-1/2 py-3 text-base font-semibold rounded-l-lg transition-all duration-200 ${
+          className={`flex-1 h-12 rounded-l-lg font-semibold transition-all duration-200 ${
             activeTab === 'latest'
               ? 'bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white'
-              : 'bg-gray-800/90 text-gray-400'
+              : 'bg-transparent border border-[#21EF6E33] text-[#666]'
           }`}
         >
           Latest
         </button>
         <button
           onClick={() => setActiveTab('top')}
-          className={`w-1/2 py-3 text-base font-semibold rounded-r-lg transition-all duration-200 ${
+          className={`flex-1 h-12 rounded-r-lg font-semibold transition-all duration-200 ${
             activeTab === 'top'
               ? 'bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white'
-              : 'bg-gray-800/90 text-gray-400'
+              : 'bg-transparent border border-[#21EF6E33] text-[#666]'
           }`}
         >
           Top
         </button>
       </div>
 
-      {/* Список секретів */}
-      <div className="space-y-3">
-        <AnimatePresence mode="wait">
-          {activeTab === 'latest' ? (
+      {/* Secrets list */}
+      <div className="w-full space-y-4">
+        <AnimatePresence mode="popLayout">
+          {(activeTab === 'latest' ? latestSecrets : topSecrets).map((s, idx) => (
             <motion.div
-              key="latest"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="space-y-3"
+              key={s.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              ref={idx === (activeTab === 'latest' ? latestSecrets : topSecrets).length - 1 ? lastSecretRef : null}
+              className="flex items-center p-4 rounded-lg bg-[#181A20] shadow-md"
             >
-              {latestSecrets.map((s, idx) => (
-                <motion.div
-                  key={s.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="bg-gray-800/90 rounded-lg p-4 border border-gray-700 shadow-lg"
-                >
-                  {SecretCardMemo(s, s.author?.toLowerCase() === address?.toLowerCase(), true)}
-                </motion.div>
-              ))}
+              <img
+                src={getAvatarUrl(s.author)}
+                alt="avatar"
+                className="w-8 h-8 rounded-full mr-3"
+                loading="lazy"
+              />
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-semibold text-white">
+                    {getAnonNick(s.author)}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => likeSecret(s.id)}
+                      className="p-2 rounded-full hover:bg-[#23243a] transition-colors"
+                    >
+                      ❤️ {s.likes}
+                    </button>
+                    {isAdmin && (
+                      <button
+                        onClick={() => deleteSecret(s.id)}
+                        className="p-2 rounded-full hover:bg-[#23243a] transition-colors"
+                      >
+                        🗑️
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <p className="text-white text-base">{s.text}</p>
+              </div>
             </motion.div>
-          ) : (
-            <motion.div
-              key="top"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="space-y-3"
-            >
-              {topSecrets.map((s, idx) => (
-                <motion.div
-                  key={s.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="bg-gray-800/90 rounded-lg p-4 border border-gray-700 shadow-lg"
-                >
-                  {SecretCardMemo(s, s.author?.toLowerCase() === address?.toLowerCase(), true)}
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
+          ))}
         </AnimatePresence>
       </div>
+
+      {/* Loading indicator */}
+      {isFetchingNextPage && (
+        <div className="w-full flex justify-center py-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#21EF6E]"></div>
+        </div>
+      )}
     </div>
   );
 }
