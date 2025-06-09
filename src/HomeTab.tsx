@@ -344,7 +344,7 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
         ? (
           <span>
             <svg width="10" height="10" style={{ display: "inline", marginRight: 8, verticalAlign: "middle" }}>
-              <circle cx="10" cy="10" r="10" fill="#21EF6E" />
+              <circle cx="5" cy="5" r="5" fill="#21EF6E" />
             </svg>
             Connected: {address.slice(0, 6)}...{address.slice(-4)}
           </span>
@@ -411,34 +411,61 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
     )}
 
     {/* Tab switcher — ФІРМОВИЙ, НЕ КВАДРАТНИКИ! */}
-<div className="flex justify-center w-full my-4">
-  <div className="flex w-full max-w-[340px] bg-[#23243a] p-1 rounded-full shadow-lg" style={{minHeight:48}}>
+<div style={{
+  display: 'flex',
+  justifyContent: 'center',
+  width: '100%',
+  margin: '24px 0'
+}}>
+  <div style={{
+    display: 'flex',
+    width: '100%',
+    maxWidth: 340,
+    background: '#23243a',
+    padding: 4,
+    borderRadius: 999,
+    boxShadow: '0 2px 16px #181A20'
+  }}>
     <button
       onClick={() => setActiveTab('latest')}
-      className={
-        "flex-1 h-11 font-semibold text-base rounded-full transition-all duration-200 " +
-        (activeTab === 'latest'
-          ? "bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white shadow-md scale-105"
-          : "bg-transparent text-[#aaa] hover:text-white")}
       style={{
-        border: "none",
-        outline: "none",
-        marginRight: "2px"
+        flex: 1,
+        height: 44,
+        fontWeight: 600,
+        fontSize: 18,
+        borderRadius: 999,
+        border: 'none',
+        outline: 'none',
+        marginRight: 2,
+        background: activeTab === 'latest'
+          ? 'linear-gradient(90deg, #21EF6E 0%, #FF2D55 100%)'
+          : 'transparent',
+        color: activeTab === 'latest' ? '#fff' : '#aaa',
+        boxShadow: activeTab === 'latest' ? '0 0 12px #21ef6e55' : 'none',
+        transition: 'all 0.22s',
+        transform: activeTab === 'latest' ? 'scale(1.05)' : 'scale(1)'
       }}
     >
       Latest
     </button>
     <button
       onClick={() => setActiveTab('top')}
-      className={
-        "flex-1 h-11 font-semibold text-base rounded-full transition-all duration-200 " +
-        (activeTab === 'top'
-          ? "bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white shadow-md scale-105"
-          : "bg-transparent text-[#aaa] hover:text-white")}
       style={{
-        border: "none",
-        outline: "none",
-        marginLeft: "2px"
+        flex: 1,
+        height: 44,
+        fontWeight: 600,
+        fontSize: 18,
+        borderRadius: 999,
+        border: 'none',
+        outline: 'none',
+        marginLeft: 2,
+        background: activeTab === 'top'
+          ? 'linear-gradient(90deg, #21EF6E 0%, #FF2D55 100%)'
+          : 'transparent',
+        color: activeTab === 'top' ? '#fff' : '#aaa',
+        boxShadow: activeTab === 'top' ? '0 0 12px #21ef6e55' : 'none',
+        transition: 'all 0.22s',
+        transform: activeTab === 'top' ? 'scale(1.05)' : 'scale(1)'
       }}
     >
       Top
