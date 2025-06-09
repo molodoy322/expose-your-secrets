@@ -310,21 +310,27 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
 
   return (
     <div className="flex flex-col items-center w-full max-w-[420px] mx-auto px-4" style={{ gap: "16px" }}>
-      {!isConnected && (
-        <button
-          onClick={() => connect({ connector: connectors[0] })}
-          style={{
-            ...btnStyle,
-            marginTop: 0,
-            width: "100%",
-            justifyContent: "center",
-            background: "linear-gradient(90deg, #21EF6E, #FF2D55)",
-            border: "none"
-          }}
-        >
-          Connect Wallet
-        </button>
-      )}
+  <button
+    onClick={() => {
+      if (!isConnected) connect({ connector: connectors[0] });
+    }}
+    className={`w-full py-3 font-bold rounded-lg transition 
+      ${isConnected
+        ? "bg-gradient-to-r from-[#333] to-[#666] text-white opacity-80 cursor-default"
+        : "bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white hover:opacity-90 active:scale-[0.98] cursor-pointer"}`}
+    disabled={isConnected}
+    style={{ marginTop: 0, justifyContent: "center", border: "none" }}
+  >
+    {isConnected
+      ? (
+        <span>
+          <svg width="20" height="20" style={{ display: "inline", marginRight: 8, verticalAlign: "middle" }}><circle cx="10" cy="10" r="10" fill="#21EF6E" /></svg>
+          Connected{address ? `: ${address.slice(0, 6)}...${address.slice(-4)}` : ""}
+        </span>
+      )
+      : "Connect Wallet"}
+  </button>
+      )
 
       <div className="w-full" style={{ marginTop: 0 }}>
         <textarea
