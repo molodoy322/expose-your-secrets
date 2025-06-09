@@ -372,7 +372,7 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
 
   // --- Infinite scroll refs ---
   const observer = useRef<IntersectionObserver | null>(null);
-  const lastSecretRef = useRef<HTMLLIElement | null>(null);
+  const lastSecretRef = useRef<HTMLDivElement | null>(null);
 
   const throttledFetchNextPage = useThrottle((fetchNextPage: () => void) => {
     fetchNextPage();
