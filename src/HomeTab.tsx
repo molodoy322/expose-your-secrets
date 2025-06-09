@@ -392,179 +392,51 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
   }, []);
 
   return (
-    <div className="flex-col">
-      {!isConnected ? (
-        <div className="card">
-          <h2>Connect Wallet</h2>
-          <p>Connect your wallet to start sharing secrets</p>
-          <div className="flex-col">
-            {connectors.map((connector: any) => (
-              <button
-                key={connector.id}
-                onClick={() => connect({ connector })}
-                className="button"
-              >
-                Connect {connector.name}
-              </button>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <>
-          <div className="flex items-center justify-center mb-8">
-            <h1 className="flex items-center gap-4 text-3xl font-bold">
-              <span>🔥</span>
-              <span className="bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] bg-clip-text text-transparent">
-                Expose Your Secrets
-              </span>
-              <span>🔥</span>
-            </h1>
-          </div>
+    <div className="flex flex-col items-center w-full max-w-[420px] mx-auto px-4">
+      {/* Логотип */}
+      <div className="flex items-center justify-center gap-2 mb-8">
+        <span className="text-3xl font-bold bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] bg-clip-text text-transparent">
+          Expose Your Secrets
+        </span>
+      </div>
 
-          <div className="flex justify-center w-full">
-            <div className="w-full max-w-[420px] p-4 my-5">
-              <div className="card bg-gradient-to-br from-[#23243a] to-[#1a1b22] p-4 rounded-xl border border-[#21EF6E33] shadow-lg">
-                <h2 className="text-xl font-bold mb-4 text-center">Share your secret</h2>
-                <textarea
-                  value={secret}
-                  onChange={(e) => setSecret(e.target.value)}
-                  placeholder="Write your secret here..."
-                  className="w-full min-h-[120px] p-4 rounded-xl bg-[#181A20] border border-[#21EF6E33] text-white placeholder-[#666] focus:outline-none focus:border-[#21EF6E] transition-all duration-200"
-                  style={{ resize: "vertical" }}
-                />
-                <div className="flex items-center justify-between mt-4">
-                  <span className="text-sm text-[#666]">0.00001 ETH per post</span>
-                  <button
-                    onClick={submitSecret}
-                    disabled={submitDisabled}
-                    className={`w-full h-12 px-6 rounded-xl font-semibold text-base transition-all duration-200 ${
-                      submitDisabled 
-                        ? 'bg-[#333] text-[#666] cursor-not-allowed opacity-50' 
-                        : 'bg-gradient-to-r from-[#21EF6E] to-[#1affb0] text-[#23243a] hover:opacity-90 hover:shadow-lg'
-                    }`}
-                  >
-                    {loading ? "Posting..." : "Post Secret"}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+      {/* Форма для секрета */}
+      <div className="w-full">
+        <h2 className="text-xl font-semibold mb-4 text-center">Share your secret</h2>
+        
+        <textarea
+          value={secret}
+          onChange={(e) => setSecret(e.target.value)}
+          placeholder="Write your secret here..."
+          className="w-full min-h-[120px] p-4 rounded-xl bg-[#181A20] border border-[#21EF6E33] text-white mb-4 focus:outline-none focus:border-[#21EF6E] transition-all duration-200"
+        />
 
-          {/* --- Мобільний таб-перемикач --- */}
-          {isMobile ? (
-            <div
-              style={{
-                display: 'flex',
-                width: '100%',
-                gap: 12,
-                margin: '16px 0',
-                borderRadius: 14,
-                background: 'rgba(34,36,58,0.66)',
-                boxShadow: '0 2px 10px #21ef6e11',
-                padding: 4,
-              }}
+        <button
+          onClick={submitSecret}
+          disabled={submitDisabled}
+          className="w-full h-12 rounded-xl font-bold text-lg bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white shadow-lg hover:opacity-90 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Post Secret (0.00001 ETH)
+        </button>
+      </div>
+
+      {/* Список секретов */}
+      <div className="w-full mt-8">
+        <AnimatePresence>
+          {latestSecrets.map((s, idx) => (
+            <motion.div
+              key={s.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              ref={idx === latestSecrets.length - 1 ? lastSecretRef : null}
             >
-              <button
-                onClick={() => setActiveTab('latest')}
-                style={{
-                  flex: 1,
-                  minHeight: 44,
-                  fontSize: '1rem',
-                  borderRadius: 12,
-                  border: activeTab === 'latest' ? '2px solid #21EF6E' : '2px solid transparent',
-                  background: activeTab === 'latest' ? 'linear-gradient(90deg, #21EF6E, #1affb0)' : 'transparent',
-                  color: activeTab === 'latest' ? '#23243a' : '#fff',
-                  fontWeight: 700,
-                  transition: 'all 0.2s',
-                  boxShadow: activeTab === 'latest' ? '0 0 10px #21ef6e55' : 'none',
-                  cursor: 'pointer',
-                }}
-              >
-                Latest
-              </button>
-              <button
-                onClick={() => setActiveTab('top')}
-                style={{
-                  flex: 1,
-                  minHeight: 44,
-                  fontSize: '1rem',
-                  borderRadius: 12,
-                  border: activeTab === 'top' ? '2px solid #FFD600' : '2px solid transparent',
-                  background: activeTab === 'top' ? 'linear-gradient(90deg, #FFD600, #FF2D55)' : 'transparent',
-                  color: activeTab === 'top' ? '#23243a' : '#fff',
-                  fontWeight: 700,
-                  transition: 'all 0.2s',
-                  boxShadow: activeTab === 'top' ? '0 0 10px #FFD60055' : 'none',
-                  cursor: 'pointer',
-                }}
-              >
-                Top
-              </button>
-            </div>
-          ) : null}
-
-          {/* --- Списки секретів --- */}
-          {isMobile ? (
-            <div className="secrets-grid">
-              {activeTab === 'latest' && latestSecrets.map((s: any) => (
-                <div key={s.id} className="card">
-                  {SecretCardMemo(s, s.author?.toLowerCase() === address?.toLowerCase())}
-                </div>
-              ))}
-              {activeTab === 'top' && topSecrets.map((s: any) => (
-                <div key={s.id} className="card">
-                  {SecretCardMemo(s, s.author?.toLowerCase() === address?.toLowerCase())}
-                </div>
-              ))}
-            </div>
-          ) : (
-            // Десктоп: як було — дві секції поряд
-            <div className="flex-row" style={{ gap: 24, marginTop: 24 }}>
-              <div style={{ flex: 1 }}>
-                <h2 style={{ color: '#21EF6E', marginBottom: 12 }}>Latest Secrets</h2>
-                <div className="secrets-grid">
-                  {latestSecrets.map((s: any) => (
-                    <div key={s.id} className="card">
-                      {SecretCardMemo(s, s.author?.toLowerCase() === address?.toLowerCase())}
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div style={{ flex: 1 }}>
-                <h2 style={{ color: '#FFD600', marginBottom: 12 }}>Top Secrets</h2>
-                <div className="secrets-grid">
-                  {topSecrets.map((s: any) => (
-                    <div key={s.id} className="card">
-                      {SecretCardMemo(s, s.author?.toLowerCase() === address?.toLowerCase())}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {hasNextPage && !isMobile && (
-            <button
-              onClick={() => fetchNextPage()}
-              disabled={isFetchingNextPage}
-              className="button"
-            >
-              {isFetchingNextPage ? "Loading..." : "Load More"}
-            </button>
-          )}
-
-          {info && (
-            <div style={{
-              padding: "var(--spacing-md)",
-              background: "rgba(255, 45, 85, 0.1)",
-              borderRadius: "var(--border-radius)",
-              marginTop: "var(--spacing-md)",
-            }}>
-              {info}
-            </div>
-          )}
-        </>
-      )}
+              {SecretCardMemo(s, s.author?.toLowerCase() === address?.toLowerCase())}
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
