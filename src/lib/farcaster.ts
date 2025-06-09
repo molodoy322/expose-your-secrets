@@ -10,6 +10,50 @@ export const farcasterConfig = {
 }
 
 let sdkInitialized = false;
+let sdkLoading = false;
+
+async function loadSDK(): Promise<void> {
+  if (sdkLoading) {
+    return new Promise((resolve) => {
+      const checkInterval = setInterval(() => {
+        if (sdkInitialized) {
+          clearInterval(checkInterval);
+          resolve();
+        }
+      }, 100);
+    });
+  }
+
+  sdkLoading = true;
+
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk/dist/index.min.js';
+    script.async = true;
+    script.defer = true;
+
+    script.onload = async () => {
+      try {
+        if (window.frame?.sdk) {
+          await window.frame.sdk.ready();
+          sdkInitialized = true;
+          resolve();
+        } else {
+          reject(new Error('SDK not available after script load'));
+        }
+      } catch (error) {
+        reject(error);
+      }
+    };
+
+    script.onerror = () => {
+      sdkLoading = false;
+      reject(new Error('Failed to load Farcaster SDK script'));
+    };
+
+    document.head.appendChild(script);
+  });
+}
 
 export async function initializeFarcaster() {
   console.log('Initializing Farcaster SDK...');
@@ -23,18 +67,8 @@ export async function initializeFarcaster() {
   }
 
   try {
-    // Даем время на загрузку SDK
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    if (!window.frame?.sdk) {
-      console.log('Farcaster SDK not found');
-      return;
-    }
-
-    console.log('Farcaster SDK found, calling ready()...');
-    await window.frame.sdk.ready();
-    console.log('Farcaster SDK ready() called successfully');
-    sdkInitialized = true;
+    await loadSDK();
+    console.log('Farcaster SDK initialized successfully');
   } catch (error) {
     console.error('Failed to initialize Farcaster SDK:', error);
     // Не выбрасываем ошибку, чтобы приложение продолжало работать
