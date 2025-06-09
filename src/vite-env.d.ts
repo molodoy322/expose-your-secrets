@@ -4,7 +4,7 @@ interface Window {
   ethereum?: any;
   frame?: {
     sdk: {
-      ready: () => Promise<void>;
+      ready?: () => Promise<void>;
       actions: {
         post: (options: {
           title?: string;

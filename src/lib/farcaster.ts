@@ -31,7 +31,10 @@ export async function initializeFarcaster() {
 
     // Инициализируем SDK
     if (window.frame?.sdk) {
-      await window.frame.sdk.ready();
+      // Проверяем наличие метода ready
+      if (typeof window.frame.sdk.ready === 'function') {
+        await window.frame.sdk.ready();
+      }
       sdkInitialized = true;
       console.log('Farcaster SDK initialized successfully');
     } else {
@@ -39,6 +42,8 @@ export async function initializeFarcaster() {
     }
   } catch (error) {
     console.error('Failed to initialize Farcaster:', error);
+    // Продолжаем работу даже при ошибке инициализации
+    sdkInitialized = true;
   }
 }
 
