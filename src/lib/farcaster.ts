@@ -16,61 +16,62 @@ const MAX_INIT_ATTEMPTS = 3;
 export async function initializeFarcaster() {
   console.log('Initializing Farcaster SDK...');
   
-  if (typeof window === 'undefined') {
-    console.warn('Farcaster SDK: Window is not defined');
-    return;
-  }
-
   const isInIframe = window.self !== window.top;
   console.log('Running in iframe:', isInIframe);
 
   if (!isInIframe) {
-    console.log('Not running in iframe, skipping Farcaster SDK initialization');
+    console.log('Not running in Farcaster iframe, skipping initialization');
     return;
   }
 
-  let initializationAttempts = 0;
-  const MAX_INIT_ATTEMPTS = 10;
-  const INIT_DELAY = 500;
-
   const waitForSDK = () => {
     return new Promise<void>((resolve, reject) => {
+      let attempts = 0;
+      const maxAttempts = 20;
+      const interval = 250;
+
       const checkSDK = () => {
-        initializationAttempts++;
-        console.log(`Checking for Farcaster SDK (attempt ${initializationAttempts}/${MAX_INIT_ATTEMPTS})...`);
+        attempts++;
+        console.log(`Checking for Farcaster SDK (attempt ${attempts}/${maxAttempts})...`);
 
         if (window.frame?.sdk) {
           console.log('Farcaster SDK found');
-          resolve();
-        } else if (initializationAttempts >= MAX_INIT_ATTEMPTS) {
-          console.warn('Farcaster SDK not found after maximum attempts');
-          reject(new Error('Farcaster SDK not found'));
+          if (typeof window.frame.sdk.ready === 'function') {
+            console.log('Farcaster SDK ready method available');
+            resolve();
+          } else {
+            console.log('Farcaster SDK ready method not available');
+            if (attempts >= maxAttempts) {
+              reject(new Error('Farcaster SDK ready method not available after maximum attempts'));
+            } else {
+              setTimeout(checkSDK, interval);
+            }
+          }
         } else {
-          setTimeout(checkSDK, INIT_DELAY);
+          console.log('Farcaster SDK not found');
+          if (attempts >= maxAttempts) {
+            reject(new Error('Farcaster SDK not found after maximum attempts'));
+          } else {
+            setTimeout(checkSDK, interval);
+          }
         }
       };
+
       checkSDK();
     });
   };
 
   try {
     await waitForSDK();
+    console.log('Farcaster SDK initialized successfully');
     
-    if (window.frame?.sdk?.ready) {
-      console.log('Calling Farcaster SDK ready method...');
-      await window.frame.sdk.ready();
-      console.log('Farcaster SDK initialized successfully');
-    } else {
-      console.warn('Farcaster SDK ready method not available');
-    }
-
     if (window.frame?.sdk?.actions) {
       console.log('Farcaster SDK actions available');
     } else {
       console.warn('Farcaster SDK actions not available');
     }
   } catch (error) {
-    console.error('Error initializing Farcaster SDK:', error);
+    console.error('Failed to initialize Farcaster SDK:', error);
   }
 }
 
