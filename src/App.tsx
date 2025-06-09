@@ -646,40 +646,17 @@ export default function App() {
   };
 
   return (
-    <div className="app-container" style={{
-      width: "100%",
-      maxWidth: "1200px",
-      margin: "0 auto",
-      padding: "1rem",
-      minHeight: "100vh",
-      display: "flex",
-      flexDirection: "column"
-    }}>
-      <div style={{
+    <div className="app-container">
+      <div className="flex-col" style={{
         flex: 1,
-        paddingTop: "1rem",
-        paddingBottom: "calc(4rem + 60px)", // Учитываем высоту нижней навигации
+        paddingTop: "var(--spacing-md)",
+        paddingBottom: "calc(var(--button-height) + var(--spacing-xl))",
         textAlign: "center",
-        background: "linear-gradient(120deg, var(--background-dark) 0%, var(--background-light) 100%)",
-        color: "var(--text-color)"
       }}>
-        <h1 style={{
-          fontSize: "clamp(1.8rem, 5vw, 2.7rem)",
-          marginBottom: "1rem",
-          background: "linear-gradient(90deg, var(--primary-color), var(--secondary-color))",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          fontWeight: 800,
-          letterSpacing: "1.3px",
-          padding: "0 1rem"
-        }}>
-          🔥 Expose Your Secrets 🔥
-        </h1>
-
-        <div style={{
-          maxWidth: "800px",
+        <div className="flex-col" style={{
+          maxWidth: "var(--container-width)",
           margin: "0 auto",
-          padding: "0 1rem"
+          padding: "0 var(--spacing-md)",
         }}>
           {activeTab === "home" && <HomeTab {...homeTabProps} />}
           {activeTab === "profile" && <ProfileTab {...profileTabProps} />}
@@ -701,6 +678,16 @@ export default function App() {
         setActiveTab={setActiveTab}
         hasNewProfile={hasNewProfile}
       />
+      <div className="flex flex-col items-center w-full max-w-[420px] mx-auto px-4">
+        {!isConnected && (
+          <button
+            onClick={() => connect({ connector: connectors[0] })}
+            className="px-4 py-2 rounded-full bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white font-bold shadow-lg hover:opacity-90 transition-all duration-200"
+          >
+            Connect Wallet
+          </button>
+        )}
+      </div>
     </div>
   );
 }
