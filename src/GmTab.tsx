@@ -205,7 +205,7 @@ export default function GmTab({ secrets, onStreakUpdate }: GmTabProps) {
       transition={{ duration: 0.3 }}
       style={{
         maxWidth: 720,
-        margin: "40px auto 0",
+        margin: "0px auto 0",
         padding: "24px",
         background: "rgba(36, 58, 37, 0.33)",
         borderRadius: 26,
