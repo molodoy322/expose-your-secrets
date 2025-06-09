@@ -343,7 +343,7 @@ export default function GmTab({ secrets, onStreakUpdate }: GmTabProps) {
         {[
           { icon: "🔥", title: "Current Streak", value: userStats?.currentStreak ?? 0, color: "#21EF6E" },
           { icon: "🏆", title: "Best Streak", value: userStats?.longestStreak ?? 0, color: "#FFD600" },
-          { icon: "📅", title: "Total Check-ins", value: userStats?.totalCheckIns ?? 0, color: "#FF2D55" }
+          { icon: "📅", title: "Total", value: userStats?.totalCheckIns ?? 0, color: "#FF2D55" }
         ].map((stat, index) => (
           <motion.div
             key={stat.title}
