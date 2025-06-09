@@ -503,49 +503,51 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
   transition={{ duration: 0.3 }}
   className="relative w-full"
   style={{
-    background: "linear-gradient(120deg, #181A20 85%, #23243a 100%)",
+    background: "linear-gradient(120deg, #181A20 88%, #23243a 100%)",
     border: "2px solid #23243a",
-    borderRadius: 16,
-    boxShadow: "0 4px 24px #21ef6e13, 0 1.5px 6px #23243a55",
-    padding: "20px 18px 14px 18px",
-    marginBottom: 12
+    borderRadius: 18,
+    boxShadow: "0 4px 28px #21ef6e15, 0 1.5px 8px #23243a55",
+    padding: "18px 16px 12px 16px",
+    marginBottom: 15
   }}
 >
-  {/* AVATAR + NICK */}
+  {/* AVATAR + NICK (crypto-style, справа вгорі) */}
   <div style={{
     position: 'absolute',
-    top: 14,
-    right: 14,
+    top: 12,
+    right: 12,
     display: 'flex',
     alignItems: 'center',
-    gap: 8,
+    gap: 7,
     zIndex: 2
   }}>
     <img
       src={getAvatarUrl(s.author)}
       alt="avatar"
       style={{
-        width: 28,
-        height: 28,
-        borderRadius: 8,
-        border: '2px solid #FFD600',
+        width: 26,
+        height: 26,
+        borderRadius: 7,
+        border: '2px solid #21EF6E',
         background: "#23243a"
       }}
       loading="lazy"
     />
     <span style={{
-      color: "#FFD600",
-      fontSize: 15,
+      color: "#21EF6E",
+      fontSize: 14.5,
       fontWeight: 700,
       background: "rgba(25,27,35,0.92)",
       borderRadius: 7,
-      padding: "2.5px 7px"
+      padding: "2.5px 7px",
+      boxShadow: "0 0 2px #181A20, 0 2px 4px #23243a44",
+      letterSpacing: ".2px"
     }}>
       {getAnonNick(s.author)}
     </span>
   </div>
 
-  {/* TEXT */}
+  {/* ТЕКСТ СЕКРЕТУ */}
   <div style={{
     fontSize: 17,
     fontWeight: 500,
@@ -558,31 +560,43 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
     {s.text}
   </div>
 
-  {/* BUTTONS (Like + Super Like + Admin) */}
+  {/* КНОПКИ: Лайк + Super Like + к-сть лайків */}
   <div style={{
     display: "flex",
     alignItems: "center",
-    gap: 10,
-    marginTop: 20
+    gap: 12,
+    marginTop: 18
   }}>
+    {/* Лайк */}
     <button
       onClick={() => likeSecret(s.id)}
-      className="bg-[#181A20] border-2 border-[#21EF6E] px-4 py-1.5 rounded-xl text-sm font-semibold text-white transition"
-      style={{ minWidth: 65 }}
+      className="border-2 px-3.5 py-1.5 rounded-full text-base font-bold flex items-center gap-2 transition"
+      style={{
+        borderColor: "#21EF6E",
+        background: "#191B23",
+        color: "#21EF6E",
+        boxShadow: "0 0 8px #21ef6e44",
+        minWidth: 55,
+      }}
     >
-      ❤️ {s.likes}
+      <span style={{ fontSize: 18, lineHeight: "18px" }}>❤️</span>
+      <span style={{ fontWeight: 700, fontSize: 16 }}>{s.likes}</span>
     </button>
+    {/* Super Like */}
     <button
       onClick={() => boostLikes(s.id)}
-      className="bg-gradient-to-r from-[#FFD600] to-[#FF2D55] text-[#23243a] font-extrabold rounded-xl px-5 py-1.5 text-sm shadow hover:shadow-lg transition-all"
+      className="bg-gradient-to-r from-[#FFD600] to-[#FF2D55] text-[#23243a] font-extrabold rounded-full px-5 py-1.5 text-sm shadow hover:shadow-lg transition-all"
       title="Super Like = +100 Likes (0.0001 ETH)"
       style={{
         fontWeight: 700,
-        minWidth: 95
+        letterSpacing: "0.3px",
+        boxShadow: "0 0 10px #FFD60044",
+        minWidth: 110
       }}
     >
       🚀 Super Like (100)
     </button>
+    {/* Admin */}
     {isAdmin && (
       <button
         onClick={() => deleteSecret(s.id)}
