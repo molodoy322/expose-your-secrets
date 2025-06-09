@@ -235,18 +235,22 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
         {/* Лого + нік у верхньому правому куті */}
         <div style={{
           position: "absolute",
-          top: 14, right: 20,
-          display: "flex", alignItems: "center", gap: 7
+          top: 14,
+          right: 18,
+          display: "flex",
+          alignItems: "center",
+          gap: 5,
+          zIndex: 2
         }}>
           <img
             src={getAvatarUrl(s.author)}
-            style={{ width: 32, height: 32, borderRadius: 8, border: "2px solid #21EF6E" }}
+            style={{ width: 22, height: 22, borderRadius: 5, border: "1.5px solid #21EF6E" }}
             alt="avatar"
           />
           <span style={{
             fontWeight: 700,
             color: "#21EF6E",
-            fontSize: 18,
+            fontSize: 14,
             letterSpacing: "0.2px"
           }}>
             {getAnonNick(s.author)}
@@ -270,29 +274,27 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
 
         {/* Функціонал внизу */}
         <div 
-          className="flex items-center justify-between w-full mt-8 gap-3"
-          style={{ minHeight: 56 }}
+          className="flex items-center justify-between w-full mt-8 gap-2"
+          style={{ minHeight: 42 }}
         >
-          {/* Лайк */}
+          {/* Like */}
           <button
             onClick={() => likeSecret(s.id)}
             disabled={!isConnected || loading}
             style={{
               background: "#181A20",
               border: "2px solid #21EF6E",
-              borderRadius: 999,
-              width: 54,
-              height: 54,
+              borderRadius: "50%",
+              width: 36,
+              height: 36,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: 28,
-              boxShadow: "0 0 12px #21ef6e66",
+              fontSize: 21,
+              boxShadow: "0 0 6px #21ef6e66",
               transition: "all 0.14s"
             }}
-          >
-            ❤️
-          </button>
+          >❤️</button>
 
           {/* Super Like */}
           <button
@@ -302,40 +304,35 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
               background: "linear-gradient(90deg,#ffe066 0%,#ffd600 50%,#ff2d55 100%)",
               border: "none",
               borderRadius: 999,
-              padding: "0 32px",
-              height: 48,
+              padding: "0 18px",
+              height: 34,
               color: "#23243a",
               fontWeight: 700,
-              fontSize: 20,
-              boxShadow: "0 4px 18px #ffd60055",
+              fontSize: 15,
+              boxShadow: "0 2px 8px #ffd60055",
               display: "flex",
               alignItems: "center",
-              gap: 9,
-              margin: "0 8px"
+              gap: 5,
             }}
-          >
-            🚀 <span>Super Like</span>
-          </button>
+          >🚀 <span>Super Like</span></button>
 
-          {/* Лічильник лайків */}
+          {/* Лічильник */}
           <div
             style={{
               background: "#181A20",
               border: "2px solid #21EF6E",
-              borderRadius: 999,
-              width: 48,
-              height: 48,
+              borderRadius: "50%",
+              width: 36,
+              height: 36,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               color: "#21EF6E",
               fontWeight: 800,
-              fontSize: 20,
-              boxShadow: "0 0 10px #21ef6e22"
+              fontSize: 16,
+              boxShadow: "0 0 6px #21ef6e22"
             }}
-          >
-            {Number(s.likes)}
-          </div>
+          >{Number(s.likes)}</div>
         </div>
       </Card>
     );
@@ -440,7 +437,7 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
         placeholder="Share your secret..."
         style={{
           width: "100%",
-          minHeight: "100px",
+          minHeight: "90px",
           padding: "12px",
           borderRadius: "11px",
           background: "#161616",
@@ -451,7 +448,10 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
           outline: "none",
           boxShadow: "0 0 10px #21ef6e55",
           backdropFilter: "blur(5px)",
-          WebkitBackdropFilter: "blur(5px)"
+          WebkitBackdropFilter: "blur(5px)",
+          textAlign: "center",
+          display: "block",
+          margin: "0 auto"
         }}
       />
       <button
