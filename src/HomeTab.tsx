@@ -311,7 +311,7 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
   return (
   <div className="flex flex-col items-center w-full max-w-[420px] mx-auto px-4" style={{ gap: "16px" }}>
     {/* ЛОГО */}
-    <div className="flex items-center justify-center w-full gap-2 mt-6 mb-2">
+    <div className="flex items-center justify-center w-full gap-2 mt-2 mb-1">
       <span style={{ fontSize: 32 }}>🔥</span>
       <h1
         className="text-3xl font-extrabold text-center"
@@ -352,7 +352,7 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
           : '0 1px 8px #21ef6e66',
         opacity: isConnected ? 0.82 : 1,
         cursor: isConnected ? 'default' : 'pointer',
-        margin: '8px 0',
+        margin: '4px 0',
         transition: 'all 0.18s'
       }}
       disabled={isConnected}
@@ -370,8 +370,8 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
     </button>
 
     {/* ПІДПИС "Share Anonymously" */}
-    <div className="w-full mb-2 mt-4 text-center font-bold text-base text-gray-200 tracking-wide">
-      Share Anonymously
+    <div className="w-full mb-1 mt-2 text-center font-bold text-base text-gray-200 tracking-wide">
+     🦾 Your Truth, On-Chain & Uncensored
     </div>
 
     {/* ФОРМА ДОДАВАННЯ СЕКРЕТУ */}
@@ -432,7 +432,7 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
   display: 'flex',
   justifyContent: 'center',
   width: '100%',
-  margin: '24px 0'
+  margin: '12px 0 4px 0'
 }}>
   <div style={{
     display: 'flex',
