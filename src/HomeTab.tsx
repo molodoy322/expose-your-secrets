@@ -213,75 +213,154 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
 
   // --- Секрет-картка: для Latest i Top ---
   function SecretCard(s: any, isMine: boolean, isMotion = true) {
-    const Card = isMotion ? motion.div : 'div';
-    
-    return (
-      <Card
-        className="flex flex-col w-full bg-gray-900 rounded-lg p-4 mb-3"
-        style={{
-          ...getMyStyle(isMine),
-          borderColor: isMine ? "#FFD600" : (cardStyle.border as string || "2px solid #21EF6E")
-        } as React.CSSProperties}
-      >
-        {/* Текст секрету */}
-        <div className="text-base italic mb-4">
-          {s.text}
-        </div>
+  const Card = isMotion ? motion.div : 'div';
 
-        {/* Нижняя часть с аватаром, именем и кнопками */}
-        <div className="flex items-center justify-between gap-2 pt-3 border-t border-gray-800">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => likeSecret(s.id)}
-              disabled={!isConnected || loading}
-              className="bg-[#181A20] border-2 px-4 py-1.5 rounded-lg text-sm font-semibold text-white min-w-[66px]"
-              style={{
-                borderColor: isMine ? "#FFD600" : (cardStyle.border as string || "2px solid #21EF6E")
-              }}
-            >
-              👍 Like
-            </button>
+  return (
+    <Card
+      className="w-full p-5 mb-5"
+      style={{
+        position: "relative",
+        background: "linear-gradient(115deg, #181A20 85%, #23243a 100%)",
+        border: isMine ? "2.5px solid #FFD600" : "2.5px solid #21EF6E",
+        borderRadius: 20,
+        boxShadow: isMine
+          ? "0 0 18px 4px #FFD60066, 0 0 0px 0px #FFD600"
+          : "0 2px 18px #21ef6e22",
+        marginBottom: 16,
+        minHeight: 105,
+        overflow: "visible"
+      }}
+    >
 
-            <button
-              onClick={() => boostLikes(s.id)}
-              disabled={!isConnected || loading}
-              className="bg-gradient-to-r from-[#FFD600] to-[#FF2D55] text-[#23243a] font-extrabold rounded-xl px-5 py-1.5 text-sm shadow-lg hover:shadow-xl transition-all duration-200"
-              title="Super Like = +100 Likes (0.0001 ETH)"
-            >
-              🚀 Super Like (100)
-            </button>
+      {/* Аватар + нік справа вгорі */}
+      <div style={{
+        position: "absolute",
+        top: 18,
+        right: 18,
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        zIndex: 2
+      }}>
+        <img
+          src={getAvatarUrl(s.author)}
+          alt="avatar"
+          style={{
+            width: 30,
+            height: 30,
+            borderRadius: 8,
+            border: '2px solid #21EF6E',
+            background: "#23243a"
+          }}
+        />
+        <span style={{
+          color: "#21EF6E",
+          fontSize: 15,
+          fontWeight: 700,
+          letterSpacing: "0.5px",
+          background: "rgba(25,27,35,0.92)",
+          borderRadius: 8,
+          padding: "2.5px 9px"
+        }}>
+          {getAnonNick(s.author)}
+        </span>
+      </div>
 
-            <span className="text-base font-bold whitespace-nowrap"
-              style={{
-                color: isMine ? "#FFD600" : (cardStyle.color || "#21EF6E")
-              }}>
-              ❤️ {Number(s.likes)} Likes
-            </span>
-          </div>
+      {/* Текст секрету */}
+      <div style={{
+        fontSize: 18,
+        fontWeight: 500,
+        color: "#fff",
+        fontStyle: "italic",
+        marginBottom: 28,
+        paddingRight: 100,
+        wordBreak: "break-word"
+      }}>
+        {s.text}
+      </div>
 
-          <div className="flex items-center gap-2">
-            {isAdmin && (
-              <button
-                onClick={() => deleteSecret && deleteSecret(s.id)}
-                className="bg-[#FF2D55] text-white rounded-lg px-3.5 py-1.5 text-sm font-bold shadow-lg"
-              >
-                Видалити
-              </button>
-            )}
-            <span className="font-bold text-base truncate">
-              {getAnonNick(s.author)}
-            </span>
-            <img 
-              src={getAvatarUrl(s.author)} 
-              alt="avatar" 
-              className="w-10 h-10 rounded-lg"
-              loading="lazy"
-            />
-          </div>
-        </div>
-      </Card>
-    );
-  }
+      {/* Блок лайків і суперлайків */}
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        marginTop: 0,
+        justifyContent: "flex-start",
+      }}>
+        {/* Like */}
+        <button
+          onClick={() => likeSecret(s.id)}
+          disabled={!isConnected || loading}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 7,
+            border: "2px solid #21EF6E",
+            background: "#191B23",
+            color: "#21EF6E",
+            borderRadius: "999px",
+            fontWeight: 700,
+            fontSize: 16,
+            padding: "8px 18px",
+            minWidth: 62,
+            boxShadow: "0 0 12px #21ef6e33",
+            cursor: (!isConnected || loading) ? "not-allowed" : "pointer",
+            opacity: (!isConnected || loading) ? 0.58 : 1,
+            transition: "all 0.18s"
+          }}
+        >
+          ❤️ <span style={{ fontWeight: 700 }}>{Number(s.likes)}</span>
+        </button>
+
+        {/* Super Like */}
+        <button
+          onClick={() => boostLikes(s.id)}
+          disabled={!isConnected || loading}
+          style={{
+            background: "linear-gradient(90deg, #FFD600 0%, #FF2D55 100%)",
+            color: "#23243a",
+            fontWeight: 800,
+            border: "none",
+            borderRadius: "999px",
+            padding: "8px 22px",
+            fontSize: 15.2,
+            marginLeft: 5,
+            boxShadow: "0 0 12px #ffd60055",
+            cursor: (!isConnected || loading) ? "not-allowed" : "pointer",
+            opacity: (!isConnected || loading) ? 0.62 : 1,
+            transition: "all 0.17s"
+          }}
+          title="Super Like = +100 Likes (0.0001 ETH)"
+        >
+          🚀 <b>Super Like (100)</b>
+        </button>
+      </div>
+
+      {/* Кнопка видалити — якщо адмін */}
+      {isAdmin && (
+        <button
+          onClick={() => deleteSecret && deleteSecret(s.id)}
+          style={{
+            position: "absolute",
+            bottom: 16,
+            right: 18,
+            background: "#FF2D55",
+            color: "#fff",
+            fontWeight: 700,
+            borderRadius: 7,
+            border: "none",
+            padding: "6px 16px",
+            fontSize: 13.8,
+            boxShadow: "0 2px 10px #ff2d5555",
+            cursor: "pointer"
+          }}
+        >
+          Delete
+        </button>
+      )}
+    </Card>
+  );
+}
 
   // --- Стан для спіннера refresh ---
   const [isRefreshing, setIsRefreshing] = useState(false);
