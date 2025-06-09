@@ -74,7 +74,7 @@ export default function HelpTab() {
       transition={{ duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
       style={{
         maxWidth: 720,
-        margin: "60px auto 0 auto",
+        margin: "0px auto 0 auto",
         padding: "36px 28px 42px 28px",
         background: "rgba(36, 58, 37, 0.33)",
         borderRadius: 26,
