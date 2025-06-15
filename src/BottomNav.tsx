@@ -67,16 +67,21 @@ export default function BottomNav({ activeTab, setActiveTab, hasNewProfile }: Bo
       borderTop: "1px solid var(--primary-color)",
       zIndex: 1000,
       padding: "0.5rem 0",
-      boxShadow: "0 -2px 10px rgba(0,0,0,0.1)"
+      boxShadow: "0 -2px 10px rgba(0,0,0,0.1)",
+      width: "100%",
+      maxWidth: "100%",
+      boxSizing: "border-box"
     }}>
       <div style={{
         display: "flex",
         justifyContent: "space-around",
         alignItems: "center",
         padding: "0.5rem",
-        maxWidth: "600px",
+        maxWidth: "100%",
         margin: "0 auto",
-        gap: "0.5rem"
+        gap: "0.5rem",
+        width: "100%",
+        boxSizing: "border-box"
       }}>
         <TabButton
           icon="🏆"

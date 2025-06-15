@@ -646,17 +646,27 @@ export default function App() {
   };
 
   return (
-    <div className="app-container">
+    <div className="app-container" style={{
+      width: "100%",
+      maxWidth: "100%",
+      overflowX: "hidden",
+      boxSizing: "border-box"
+    }}>
       <div className="flex-col" style={{
         flex: 1,
         paddingTop: "var(--spacing-md)",
         paddingBottom: "calc(var(--button-height) + var(--spacing-xl))",
         textAlign: "center",
+        width: "100%",
+        maxWidth: "100%",
+        boxSizing: "border-box"
       }}>
         <div className="flex-col" style={{
-          maxWidth: "var(--container-width)",
+          maxWidth: "100%",
           margin: "0 auto",
           padding: "0 var(--spacing-md)",
+          width: "100%",
+          boxSizing: "border-box"
         }}>
           {activeTab === "home" && <HomeTab {...homeTabProps} />}
           {activeTab === "profile" && <ProfileTab {...profileTabProps} />}

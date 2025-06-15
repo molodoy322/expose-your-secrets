@@ -419,7 +419,7 @@ export default function AchievementsTab({
       transition={{ duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
       style={{
         width: "100%",
-        maxWidth: "100vw",
+        maxWidth: "100%",
         margin: "0",
         padding: "20px",
         background: "rgba(36, 58, 37, 0.33)",
@@ -553,7 +553,8 @@ export default function AchievementsTab({
         width: "100%",
         maxWidth: "100%",
         boxSizing: "border-box",
-        overflowX: "hidden"
+        overflowX: "hidden",
+        padding: "0 10px"
       }}>
         {achievements.map((category) => (
           <motion.button
@@ -616,7 +617,7 @@ export default function AchievementsTab({
             
             <div style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
               gap: "15px",
               marginBottom: "20px",
               width: "100%",
@@ -636,13 +637,15 @@ export default function AchievementsTab({
                     border: achievement.isCompleted 
                       ? "2px solid #21EF6E"
                       : "2px solid #333",
-                    padding: 20,
+                    padding: "20px",
                     textAlign: "left",
                     position: "relative",
                     overflow: "hidden",
                     boxShadow: achievement.isCompleted 
                       ? "0 0 20px 2px #21ef6e33"
-                      : "none"
+                      : "none",
+                    width: "100%",
+                    boxSizing: "border-box"
                   }}
                 >
                   <div style={{
