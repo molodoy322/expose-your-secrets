@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { getUserStats } from "./lib/contract";
+import { getUserStats, getLikesToday } from "./lib/contract";
 import { shareToFarcaster } from './lib/farcaster';
 import { useThrottle } from './lib/hooks';
 
@@ -129,7 +129,21 @@ export default function HomeTab({
       Number(s.timestamp) * 1000 >= todayStart.getTime()
   ).length;
 
-  const likesToday = 0; // залиш на 0 якщо нема timestamp на лайках
+  const [likesToday, setLikesToday] = useState(0);
+
+  useEffect(() => {
+    async function fetchLikesToday() {
+      if (!address) return;
+      try {
+        const today = Math.floor(todayStart.getTime() / 1000);
+        const likes = await getLikesToday(address, today);
+        setLikesToday(Number(likes));
+      } catch (error) {
+        console.error('Error fetching likes today:', error);
+      }
+    }
+    fetchLikesToday();
+  }, [address, todayStart]);
 
     // --- User stats state ---
 const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: number}>({ secretsPosted: 0, likesGiven: 0 });
@@ -476,6 +490,38 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
       >
         {loading ? "Posting..." : "Post Secret"}
       </button>
+
+      {/* Блок с лимитами */}
+      {isConnected && (
+        <div style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginTop: "12px",
+          padding: "12px",
+          background: "rgba(34,36,58,0.66)",
+          borderRadius: "11px",
+          border: "1px solid #21EF6E33"
+        }}>
+          <div style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "4px"
+          }}>
+            <span style={{ fontSize: "14px", color: "#aaa" }}>Posts Today</span>
+            <span style={{ fontSize: "18px", fontWeight: "700", color: "#21EF6E" }}>{postsToday}/5</span>
+          </div>
+          <div style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "4px"
+          }}>
+            <span style={{ fontSize: "14px", color: "#aaa" }}>Likes Today</span>
+            <span style={{ fontSize: "18px", fontWeight: "700", color: "#FFD600" }}>{likesToday}/10</span>
+          </div>
+        </div>
+      )}
     </div>
 
     {/* Інфо, таби, секрети — залишаєш як було */}
