@@ -32,10 +32,14 @@ export function getPublicClient() {
 				} catch (e) {
 					lastError = e;
 					tries++;
-					currentRpcIndex = (currentRpcIndex + 1) % RPC_ENDPOINTS.length;
-					client = createClientWithIndex(currentRpcIndex);
+					if (tries < RPC_ENDPOINTS.length) {
+						currentRpcIndex = (currentRpcIndex + 1) % RPC_ENDPOINTS.length;
+						client = createClientWithIndex(currentRpcIndex);
+						console.warn(`RPC endpoint failed, switching to next: ${RPC_ENDPOINTS[currentRpcIndex]}`);
+					}
 				}
 			}
+			// Только если все RPC не сработали — выбрасываем ошибку
 			throw lastError;
 		},
 		// Проксируем остальные методы viem publicClient
