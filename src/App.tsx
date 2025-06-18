@@ -366,7 +366,6 @@ export default function App() {
         });
       }
       console.log('calls for multicall:', calls);
-      // @ts-expect-error
       const multicallResult: any[] = await withFailover(client => client.multicall({ contracts: calls }) as any[]);
       console.log('multicallResult:', multicallResult);
       const secretsData = multicallResult.map((r, idx) => {
