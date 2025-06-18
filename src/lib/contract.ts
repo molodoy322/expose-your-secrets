@@ -361,29 +361,29 @@ export const ABI = [
 ];
 
 export async function getPostsToday(address: string, today: number) {
-	return await publicClient.readContract({
+	return await withFailover(client => client.readContract({
 		address: CONTRACT_ADDRESS,
 		abi: ABI,
 		functionName: "postsPerDay",
 		args: [address, today],
-	});
+	}));
 }
 
 export async function getLikesToday(address: string, today: number) {
-	return await publicClient.readContract({
+	return await withFailover(client => client.readContract({
 		address: CONTRACT_ADDRESS,
 		abi: ABI,
 		functionName: "likesPerDay",
 		args: [address, today],
-	});
+	}));
 }
 
 // --- Stats по користувачу (від контракту) ---
 export async function getUserStats(address: string) {
-	return await publicClient.readContract({
+	return await withFailover(client => client.readContract({
 		address: CONTRACT_ADDRESS,
 		abi: ABI,
 		functionName: "getUserStats",
 		args: [address],
-	});
+	}));
 }

@@ -1,5 +1,6 @@
 import { createPublicClient, http } from 'viem';
 import { base } from 'viem/chains';
+import { withFailover } from './contract';
 
 // Адреса контракту GmStreak
 export const GM_CONTRACT_ADDRESS = "0x399017dA3CF3B2A7148cEdc1C4Dc0228c03Cfb4C";
@@ -518,13 +519,12 @@ export const GM_ABI = [
 
 export async function getGmUserStats(userAddress: string, chainId: number) {
 	try {
-		const stats = await publicClient.readContract({
+		const stats = await withFailover(client => client.readContract({
 			address: GM_CONTRACT_ADDRESS,
 			abi: GM_ABI,
 			functionName: 'getUserStats',
 			args: [userAddress, BigInt(chainId)],
-		}) as [bigint, bigint, bigint, bigint, boolean];
-		
+		})) as [bigint, bigint, bigint, bigint, boolean];
 		return {
 			currentStreak: stats[0],
 			totalCheckIns: stats[1],
@@ -546,11 +546,11 @@ export async function getGmUserStats(userAddress: string, chainId: number) {
 
 export async function getGmCheckInPrice() {
 	try {
-		const price = await publicClient.readContract({
+		const price = await withFailover(client => client.readContract({
 			address: GM_CONTRACT_ADDRESS,
 			abi: GM_ABI,
 			functionName: 'getCheckInPrice',
-		});
+		}));
 		return price;
 	} catch (error) {
 		console.error('Error fetching check-in price:', error);
@@ -560,11 +560,11 @@ export async function getGmCheckInPrice() {
 
 export async function getGmCurrentTime() {
 	try {
-		const time = await publicClient.readContract({
+		const time = await withFailover(client => client.readContract({
 			address: GM_CONTRACT_ADDRESS,
 			abi: GM_ABI,
 			functionName: 'getCurrentTime',
-		});
+		}));
 		return time;
 	} catch (error) {
 		console.error('Error fetching current time from GM contract:', error);
@@ -574,11 +574,11 @@ export async function getGmCurrentTime() {
 
 export async function getGmCurrentDay() {
 	try {
-		const day = await publicClient.readContract({
+		const day = await withFailover(client => client.readContract({
 			address: GM_CONTRACT_ADDRESS,
 			abi: GM_ABI,
 			functionName: 'getCurrentDay',
-		});
+		}));
 		return day;
 	} catch (error) {
 		console.error('Error fetching current day from GM contract:', error);
