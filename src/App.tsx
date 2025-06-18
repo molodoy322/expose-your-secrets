@@ -366,8 +366,9 @@ export default function App() {
         });
       }
       // viem multicall возвращает { status, result } для каждого вызова
-      const multicallResult = await publicClient.multicall({ contracts: calls }) as any[];
-      const secretsData = multicallResult.map((r: any, idx: number) => {
+      // @ts-expect-error
+      const multicallResult: any[] = await publicClient.multicall({ contracts: calls }) as any[];
+      const secretsData = multicallResult.map((r, idx) => {
         if (r.status === 'success') {
           return r.result;
         } else {
