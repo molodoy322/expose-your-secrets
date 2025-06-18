@@ -19,6 +19,21 @@ function createClientWithIndex(idx: number) {
 	});
 }
 
+// Универсальная обёртка для любого метода viem
+export async function withFailover(fn) {
+	let lastError;
+	for (let i = 0; i < RPC_ENDPOINTS.length; i++) {
+		const client = createClientWithIndex(i);
+		try {
+			return await fn(client);
+		} catch (e) {
+			lastError = e;
+			console.warn(`RPC endpoint failed, switching to next: ${RPC_ENDPOINTS[i]}`);
+		}
+	}
+	throw lastError;
+}
+
 export function getPublicClient() {
 	let client = createClientWithIndex(currentRpcIndex);
 	return {

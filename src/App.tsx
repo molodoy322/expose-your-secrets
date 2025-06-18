@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
-import { CONTRACT_ADDRESS, ABI, publicClient } from "./lib/contract";
+import { CONTRACT_ADDRESS, ABI, publicClient, withFailover } from "./lib/contract";
 import { encodeFunctionData } from "viem";
 import { debounce } from "lodash";
 import { motion, AnimatePresence } from "framer-motion";
@@ -320,7 +320,7 @@ export default function App() {
       console.log('Checking RPC connection...');
       let blockNumber;
       try {
-        blockNumber = await publicClient.getBlockNumber();
+        blockNumber = await withFailover(client => client.getBlockNumber());
         console.log('Current block number:', blockNumber);
       } catch (e) {
         console.error('Error in getBlockNumber:', e);
@@ -332,11 +332,11 @@ export default function App() {
       console.log('Reading contract count...');
       let count;
       try {
-        count = await publicClient.readContract({
+        count = await withFailover(client => client.readContract({
           address: CONTRACT_ADDRESS,
           abi: ABI,
           functionName: "getSecretsCount",
-        });
+        }));
         console.log('getSecretsCount result:', count);
       } catch (e) {
         console.error('Error in getSecretsCount:', e);
