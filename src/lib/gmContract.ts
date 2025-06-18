@@ -1,15 +1,12 @@
 import { createPublicClient, http } from 'viem';
 import { base } from 'viem/chains';
-import { withFailover } from './contract';
+import { withFailover, getPublicClient } from './contract';
 
 // Адреса контракту GmStreak
 export const GM_CONTRACT_ADDRESS = "0x399017dA3CF3B2A7148cEdc1C4Dc0228c03Cfb4C";
 
-// Ініціалізуємо publicClient
-export const publicClient = createPublicClient({
-	chain: base,
-	transport: http('https://base-mainnet.infura.io/v3/9010eab5407747c68ac69b02ffee4255')
-});
+// Ініціалізуємо publicClient з failover
+export const publicClient = getPublicClient();
 
 // ABI для контракту GmStreak
 export const GM_ABI = [
