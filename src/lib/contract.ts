@@ -3,11 +3,11 @@ import { base } from 'viem/chains'
 
 // Список RPC-эндпоинтов берём из .env (или используем дефолтные)
 const RPC_ENDPOINTS = [
-	process.env.VITE_BASE_RPC1,
-	process.env.VITE_BASE_RPC2,
-	process.env.VITE_BASE_RPC3,
-	process.env.VITE_BASE_RPC4,
-	'https://mainnet.base.org', // публичный
+	'https://base-mainnet.infura.io/v3/9010eab5407747c68ac69b02ffee4255',
+	'https://rpc.ankr.com/base/f22bcb8bf9f5467e7fd90dc9f165e8f052cd31b37e663494457256fdc5540f33',
+	'https://rpc.ankr.com/base/1986b1a324ed8485c49af459da86f1ec63b5f186ef7b87e83ba59a7396f33b52',
+	'https://base-mainnet.infura.io/v3/9741d204a8af41669ea24454ebca7978',
+	'https://mainnet.base.org',
 ].filter(Boolean);
 
 let currentRpcIndex = 0;
