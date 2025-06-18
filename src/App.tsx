@@ -365,9 +365,10 @@ export default function App() {
           args: [BigInt(i)],
         });
       }
-      // viem multicall возвращает { status, result } для каждого вызова
+      console.log('calls for multicall:', calls);
       // @ts-expect-error
-      const multicallResult: any[] = await publicClient.multicall({ contracts: calls }) as any[];
+      const multicallResult: any[] = await withFailover(client => client.multicall({ contracts: calls }) as any[]);
+      console.log('multicallResult:', multicallResult);
       const secretsData = multicallResult.map((r, idx) => {
         if (r.status === 'success') {
           return r.result;
@@ -376,7 +377,6 @@ export default function App() {
           return null;
         }
       });
-      console.log('Fetched secrets data (multicall):', secretsData.length);
       console.log('Raw secrets data:', secretsData);
       
       let arr: Secret[] = secretsData.map((data: any, idx) => {
@@ -395,15 +395,9 @@ export default function App() {
       arr = arr.reverse();
       console.log('Processed secrets (fetchSecrets):', arr.length);
       console.log('Final secrets array:', arr);
-      
-      if (append) {
-        setSecrets(prevSecrets => {
-          const newSecrets = [...prevSecrets, ...arr];
-          return newSecrets;
-        });
-      } else {
-        setSecrets(arr);
-      }
+      // Лог перед setSecrets
+      console.log('Секреты из контракта:', arr);
+      setSecrets(arr);
       setPage(newPage);
       
       // Проверяем профиль пользователя
