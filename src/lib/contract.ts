@@ -1,20 +1,53 @@
 import { createPublicClient, http } from 'viem'
 import { base } from 'viem/chains'
 
+// Список RPC-эндпоинтов берём из .env (или используем дефолтные)
+const RPC_ENDPOINTS = [
+	process.env.VITE_BASE_RPC1,
+	process.env.VITE_BASE_RPC2,
+	process.env.VITE_BASE_RPC3,
+	process.env.VITE_BASE_RPC4,
+	'https://mainnet.base.org', // публичный
+].filter(Boolean);
 
+let currentRpcIndex = 0;
 
+function createClientWithIndex(idx: number) {
+	return createPublicClient({
+		chain: base,
+		transport: http(RPC_ENDPOINTS[idx])
+	});
+}
+
+export function getPublicClient() {
+	let client = createClientWithIndex(currentRpcIndex);
+	return {
+		async request(method: string, params: any[] = []) {
+			let tries = 0;
+			let lastError;
+			while (tries < RPC_ENDPOINTS.length) {
+				try {
+					// @ts-ignore
+					return await client.request({ method, params });
+				} catch (e) {
+					lastError = e;
+					tries++;
+					currentRpcIndex = (currentRpcIndex + 1) % RPC_ENDPOINTS.length;
+					client = createClientWithIndex(currentRpcIndex);
+				}
+			}
+			throw lastError;
+		},
+		// Проксируем остальные методы viem publicClient
+		...client
+	};
+}
+
+// Для обратной совместимости (старый publicClient)
+export const publicClient = getPublicClient();
 
 // Основна адреса контракту
 export const CONTRACT_ADDRESS = "0xC786be8d7aa704bf274B155Cb60CBFE4D3c50D5d";
-
-// Ініціалізуємо publicClient
-export const publicClient = createPublicClient({
-  chain: base,
-  transport: http('https://mainnet.base.org')
-})
-
-
-
 
 // Новий повний ABI:
 export const ABI = [
@@ -309,29 +342,29 @@ export const ABI = [
 ];
 
 export async function getPostsToday(address: string, today: number) {
-  return await publicClient.readContract({
-    address: CONTRACT_ADDRESS,
-    abi: ABI,
-    functionName: "postsPerDay",
-    args: [address, today],
-  });
+	return await publicClient.readContract({
+		address: CONTRACT_ADDRESS,
+		abi: ABI,
+		functionName: "postsPerDay",
+		args: [address, today],
+	});
 }
 
 export async function getLikesToday(address: string, today: number) {
-  return await publicClient.readContract({
-    address: CONTRACT_ADDRESS,
-    abi: ABI,
-    functionName: "likesPerDay",
-    args: [address, today],
-  });
+	return await publicClient.readContract({
+		address: CONTRACT_ADDRESS,
+		abi: ABI,
+		functionName: "likesPerDay",
+		args: [address, today],
+	});
 }
 
 // --- Stats по користувачу (від контракту) ---
 export async function getUserStats(address: string) {
-  return await publicClient.readContract({
-    address: CONTRACT_ADDRESS,
-    abi: ABI,
-    functionName: "getUserStats",
-    args: [address],
-  });
+	return await publicClient.readContract({
+		address: CONTRACT_ADDRESS,
+		abi: ABI,
+		functionName: "getUserStats",
+		args: [address],
+	});
 }
