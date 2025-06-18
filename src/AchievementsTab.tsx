@@ -511,26 +511,6 @@ export default function AchievementsTab({
         gap: "12px"
       }}>
         🏆 Achievements
-        <motion.button
-          onClick={handleRefresh}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          style={{
-            background: "rgba(33, 239, 110, 0.1)",
-            border: "2px solid #21EF6E",
-            color: "#21EF6E",
-            padding: "8px 16px",
-            borderRadius: "12px",
-            fontSize: "16px",
-            fontWeight: 700,
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px"
-          }}
-        >
-          Refresh
-        </motion.button>
       </div>
       <div style={{
         fontSize: 21,
@@ -543,19 +523,18 @@ export default function AchievementsTab({
       </div>
 
       {/* Category Tabs */}
-      <div style={{
-        display: "flex",
-        flexDirection: "row",
-        flexWrap: "wrap",
-        justifyContent: "center",
-        gap: "10px",
-        marginBottom: "30px",
-        width: "100%",
-        maxWidth: "100%",
-        boxSizing: "border-box",
-        overflowX: "hidden",
-        padding: "0 10px"
-      }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(2, 1fr)",
+          gap: "14px",
+          marginBottom: "30px",
+          width: "100%",
+          maxWidth: "100%",
+          boxSizing: "border-box",
+          padding: "0 10px"
+        }}
+      >
         {achievements.map((category) => (
           <motion.button
             key={category.id}
@@ -563,29 +542,57 @@ export default function AchievementsTab({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             style={{
-              background: activeCategory === category.id 
+              background: activeCategory === category.id
                 ? "linear-gradient(90deg, #21EF6E, #FFD600)"
                 : "rgba(34,36,58,0.66)",
               color: activeCategory === category.id ? "#23243a" : "#fff",
               border: "none",
               borderRadius: 12,
-              padding: "10px 20px",
-              fontSize: 16,
-              fontWeight: 700,
+              padding: "22px 0 18px 0",
+              fontSize: 18,
+              fontWeight: 800,
               cursor: "pointer",
               display: "flex",
+              flexDirection: "column",
               alignItems: "center",
-              gap: 8,
+              justifyContent: "center",
+              gap: 12,
               transition: "all 0.2s",
-              boxShadow: activeCategory === category.id 
+              boxShadow: activeCategory === category.id
                 ? "0 0 15px 2px #21ef6e44"
-                : "none"
+                : "none",
+              minHeight: 100,
+              minWidth: 0
             }}
           >
-            <span style={{ fontSize: 20 }}>{category.icon}</span>
-            {category.title}
+            <span style={{ fontSize: 36, marginBottom: 2 }}>{category.icon}</span>
+            <span style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.15, textAlign: "center", wordBreak: "break-word" }}>{category.title}</span>
           </motion.button>
         ))}
+      </div>
+
+      {/* Кнопка Refresh под категориями */}
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: 24 }}>
+        <motion.button
+          onClick={handleRefresh}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          style={{
+            background: "rgba(33, 239, 110, 0.1)",
+            border: "2px solid #21EF6E",
+            color: "#21EF6E",
+            padding: "8px 24px",
+            borderRadius: "12px",
+            fontSize: "16px",
+            fontWeight: 700,
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px"
+          }}
+        >
+          Refresh
+        </motion.button>
       </div>
 
       {/* Active Category Content */}

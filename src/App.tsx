@@ -2,115 +2,36 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { CONTRACT_ADDRESS, ABI, publicClient } from "./lib/contract";
 import { encodeFunctionData } from "viem";
+import { debounce } from "lodash";
+import { motion, AnimatePresence } from "framer-motion";
+import { initializeFarcaster } from "./lib/farcaster";
 import HomeTab from "./HomeTab";
 import ProfileTab from "./ProfileTab";
 import GmTab from "./GmTab";
 import AchievementsTab from "./AchievementsTab";
 import HelpTab from "./HelpTab";
 import BottomNav from "./BottomNav";
-import { useInfiniteQuery } from '@tanstack/react-query';
-import { initializeFarcaster } from "./lib/farcaster";
-import { base } from 'wagmi/chains';
-import { useChainId, useSwitchChain } from 'wagmi';
+import { getAvatarUrl } from "./lib/assets";
 
-declare global { interface Window { ethereum?: any } }
+// Адрес админа
+const ADMIN_ADDRESS = "0x1234567890123456789012345678901234567890";
 
-const ADMIN_ADDRESS = "0xCaB3D1E0ECca7259aA47EaC724a482b80291BbD4"; // Вписуй свою адресу з мітамаска
-
-
+// Стиль карточки
 const cardStyle = {
   background: "linear-gradient(140deg, #23243a 70%, #1a1b22 100%)",
-  borderRadius: 18,
-  border: "1.8px solid",
-  borderImage: "linear-gradient(90deg, #21EF6E 0%, #FF2D55 100%) 1",
-  boxShadow: "0 0 18px 1px #21ef6e22",
-  padding: 22,
-  marginBottom: 22,
+  borderRadius: 16,
+  border: "2px solid #21EF6E",
+  padding: 20,
+  boxShadow: "0 0 20px 2px #21ef6e33",
   backdropFilter: "blur(8px)",
   WebkitBackdropFilter: "blur(8px)",
+  position: "relative" as const,
+  overflow: "hidden",
+  width: "100%",
+  boxSizing: "border-box" as const,
 };
 
-// --- LocalStorage ключ (унікальний для юзера) ---
-function getProfileKey(address?: string) {
-  return address ? `profile_last_seen_${address.toLowerCase()}` : "profile_last_seen";
-}
-function saveProfileState(address: string | undefined, arr: any[]) {
-  if (!address) return;
-  const my = arr.filter(s => s.author?.toLowerCase() === address.toLowerCase())
-    .map(s => ({ id: s.id, likes: Number(s.likes) }));
-  localStorage.setItem(getProfileKey(address), JSON.stringify(my));
-}
-function loadProfileState(address: string | undefined): {id: number, likes: number}[] {
-  if (!address) return [];
-  try {
-    const raw = localStorage.getItem(getProfileKey(address));
-    if (!raw) return [];
-    return JSON.parse(raw);
-  } catch { return []; }
-}
-
-// --- Base Mainnet ChainId ---
-const BASE_CHAIN_ID = 8453;
-
-function RequireBaseNetwork({ children }: { children: React.ReactNode }) {
-  const chainId = useChainId();
-  const { switchChain } = useSwitchChain();
-  const [isCorrectNetwork, setIsCorrectNetwork] = useState(true);
-
-  useEffect(() => {
-    async function checkNetwork() {
-      if (!window.ethereum) {
-        setIsCorrectNetwork(false);
-        return;
-      }
-
-      try {
-        const chainIdHex = await window.ethereum.request({ method: 'eth_chainId' });
-        const chainId = parseInt(chainIdHex, 16);
-        setIsCorrectNetwork(chainId === BASE_CHAIN_ID);
-      } catch (error) {
-        console.error('Error checking network:', error);
-        setIsCorrectNetwork(false);
-      }
-    }
-    checkNetwork();
-  }, []);
-
-  useEffect(() => {
-    if (window.ethereum) {
-      window.ethereum.on('chainChanged', (newChainIdHex: string) => {
-        const newChainId = parseInt(newChainIdHex, 16);
-        setIsCorrectNetwork(newChainId === BASE_CHAIN_ID);
-      });
-    }
-  }, []);
-
-  async function switchToBase() {
-    if (!window.ethereum) return;
-    
-    try {
-      await switchChain({ chainId: BASE_CHAIN_ID });
-    } catch (error) {
-      console.error('Error switching network:', error);
-      alert("Please switch network to Base in your wallet.");
-    }
-  }
-
-  if (!isCorrectNetwork) {
-    return (
-      <div className="network-warning">
-        <h2>⚠️ Wrong Network</h2>
-        <p>Please switch to <b>Base</b> network in your wallet to use the app.</p>
-        <button onClick={switchToBase}>
-          Switch to Base
-        </button>
-      </div>
-    );
-  }
-  return <>{children}</>;
-}
-
-// Типы для секретов и кэша
+// Интерфейс для секрета
 interface Secret {
   id: number;
   text: string;
@@ -118,6 +39,30 @@ interface Secret {
   author: string;
   timestamp: number;
   deleted: boolean;
+}
+
+// Функции для работы с профилем
+function getProfileKey(address: string): string {
+  return `profile_${address.toLowerCase()}`;
+}
+
+function loadProfileState(address: string): { id: number; likes: number }[] {
+  try {
+    const saved = localStorage.getItem(getProfileKey(address));
+    return saved ? JSON.parse(saved) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveProfileState(address: string, secrets: Secret[]): void {
+  try {
+    const my = secrets.filter(s => s.author?.toLowerCase() === address.toLowerCase())
+      .map(s => ({ id: s.id, likes: Number(s.likes) }));
+    localStorage.setItem(getProfileKey(address), JSON.stringify(my));
+  } catch (e) {
+    console.error('Failed to save profile state:', e);
+  }
 }
 
 interface CacheData {
@@ -220,7 +165,7 @@ async function fetchSecretsPage({ pageParam = 1 }) {
             address: CONTRACT_ADDRESS,
             abi: ABI,
             functionName: "getSecret",
-            args: [j],
+            args: [BigInt(j)],
           })
         );
       }
@@ -274,18 +219,6 @@ function shouldRefreshCache(): boolean {
   return Date.now() - lastUpdate > MIN_REFRESH_INTERVAL;
 }
 
-// Функция дебаунсинга
-function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  wait: number
-): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout;
-  return (...args: Parameters<T>) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-}
-
 export default function App() {
   // Ініціалізуємо Farcaster SDK з невеликою затримкою, щоб дати додатку відрендеритися
   useEffect(() => {
@@ -312,30 +245,21 @@ export default function App() {
   const [currentStreak, setCurrentStreak] = useState(0);
   const [totalPosts, setTotalPosts] = useState(0);
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } = useInfiniteQuery({
-    queryKey: ["secrets"],
-    queryFn: fetchSecretsPage,
-    getNextPageParam: (lastPage: Secret[], allPages) => {
-      if (lastPage.length < PAGE_SIZE) return undefined;
-      return allPages.length + 1;
-    },
-    initialPageParam: 1,
-    refetchOnWindowFocus: false,
-    staleTime: 5 * 60 * 1000,
-  });
+  // Убираем React Query и используем простую загрузку
+  const [hasNextPage, setHasNextPage] = useState(false);
+  const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
 
   // Обновляем секреты при изменении данных
   useEffect(() => {
-    if (data?.pages) {
-      const allSecrets = data.pages.flat() as Secret[];
-      setSecrets(allSecrets);
-      if (address) {
-        const myNewSecrets = allSecrets.filter(s => s.author?.toLowerCase() === address.toLowerCase() && !s.deleted);
-        setMySecrets(myNewSecrets);
-        setTotalLikesReceived(myNewSecrets.reduce((sum: number, s: Secret) => sum + Number(s.likes), 0));
-      }
+    console.log('Secrets updated:', secrets.length, secrets);
+    if (address && secrets.length > 0) {
+      const myNewSecrets = secrets.filter(s => 
+        s.author?.toLowerCase() === address.toLowerCase() && !s.deleted
+      );
+      setMySecrets(myNewSecrets);
+      setTotalLikesReceived(myNewSecrets.reduce((sum: number, s: Secret) => sum + Number(s.likes), 0));
     }
-  }, [data, address]);
+  }, [secrets, address]);
 
   const visibleSecrets = secrets.filter(s => !s.deleted);
 
@@ -346,16 +270,20 @@ export default function App() {
   const updateStats = useCallback(() => {
     if (!address) return;
     
-    // Подсчитываем лайки
-    const likesGiven = secrets.reduce((acc, s) => {
-      return acc + (s.author?.toLowerCase() === address.toLowerCase() ? 0 : 1);
-    }, 0);
+    // Подсчитываем посты пользователя (не удаленные)
+    const userPosts = secrets.filter(s => 
+      s.author?.toLowerCase() === address.toLowerCase() && !s.deleted
+    );
     
-    const likesReceived = secrets.reduce((acc, s) => {
-      return acc + (s.author?.toLowerCase() === address.toLowerCase() ? s.likes : 0);
-    }, 0);
+    // Подсчитываем лайки, полученные пользователем
+    const likesReceived = userPosts.reduce((acc, s) => acc + Number(s.likes), 0);
     
-    const posts = secrets.filter(s => s.author?.toLowerCase() === address.toLowerCase()).length;
+    // Подсчитываем общее количество постов пользователя
+    const posts = userPosts.length;
+    
+    // Для лайков, данных пользователем, нужно использовать данные из контракта
+    // Пока используем 0, так как эта информация не хранится в секретах
+    const likesGiven = 0;
     
     setTotalLikesGiven(likesGiven);
     setTotalLikesReceived(likesReceived);
@@ -379,59 +307,107 @@ export default function App() {
   // Обработчик обновления стрика
   const handleStreakUpdate = (streak: number) => {
     setCurrentStreak(streak);
-    updateStats();
   };
 
   // --- Fetch secrets & badge logic ---
   async function fetchSecrets(newPage = 1, append = false) {
-    if (!shouldRefreshCache() && newPage === 1) {
-      return;
-    }
+    console.log('Fetching secrets:', { newPage, append });
     setFetchLoading(true);
+    setInfo(""); // Очищаем предыдущие сообщения об ошибках
+    
     try {
-      const count = await publicClient.readContract({
-        address: CONTRACT_ADDRESS,
-        abi: ABI,
-        functionName: "getSecretsCount",
-      });
+      // Проверяем подключение к RPC
+      console.log('Checking RPC connection...');
+      let blockNumber;
+      try {
+        blockNumber = await publicClient.getBlockNumber();
+        console.log('Current block number:', blockNumber);
+      } catch (e) {
+        console.error('Error in getBlockNumber:', e);
+        setInfo("Ошибка при подключении к RPC: " + (e?.message || e));
+        setFetchLoading(false);
+        return;
+      }
+      
+      console.log('Reading contract count...');
+      let count;
+      try {
+        count = await publicClient.readContract({
+          address: CONTRACT_ADDRESS,
+          abi: ABI,
+          functionName: "getSecretsCount",
+        });
+        console.log('getSecretsCount result:', count);
+      } catch (e) {
+        console.error('Error in getSecretsCount:', e);
+        setInfo("Ошибка при получении количества секретов: " + (e?.message || e));
+        setFetchLoading(false);
+        return;
+      }
       const total = Number(count);
-      const start = Math.max(0, total - newPage * PAGE_SIZE);
-      const end = total - (newPage - 1) * PAGE_SIZE;
-      const promises = [];
-      for (let i = start; i < end; i++) {
-        promises.push(
-          publicClient.readContract({
-            address: CONTRACT_ADDRESS,
-            abi: ABI,
-            functionName: "getSecret",
-            args: [BigInt(i)],
-          })
-        );
+      console.log('Total secrets count (fetchSecrets):', total);
+      
+      if (total === 0) {
+        console.log('No secrets found');
+        setSecrets([]);
+        setFetchLoading(false);
+        return;
       }
-      const secretsData = await Promise.all(promises);
-      let arr: Secret[] = secretsData.map((data: any, idx) => ({
-        id: start + idx,
-        text: data[0],
-        likes: Number(data[1]),
-        author: data[2],
-        timestamp: Number(data[3]),
-        deleted: data[4],
-      }));
+      
+      // Загружаем все секреты через multicall
+      console.log('Loading secrets from contract (multicall)...');
+      const calls = [];
+      for (let i = 0; i < total; i++) {
+        calls.push({
+          address: CONTRACT_ADDRESS,
+          abi: ABI,
+          functionName: "getSecret",
+          args: [BigInt(i)],
+        });
+      }
+      // viem multicall возвращает { status, result } для каждого вызова
+      const multicallResult = await publicClient.multicall({ contracts: calls }) as any[];
+      const secretsData = multicallResult.map((r: any, idx: number) => {
+        if (r.status === 'success') {
+          return r.result;
+        } else {
+          console.error(`Multicall error for secret #${idx}:`, r.error);
+          return null;
+        }
+      });
+      console.log('Fetched secrets data (multicall):', secretsData.length);
+      console.log('Raw secrets data:', secretsData);
+      
+      let arr: Secret[] = secretsData.map((data: any, idx) => {
+        if (!data) return null;
+        return {
+          id: idx,
+          text: data[0],
+          likes: Number(data[1]),
+          author: data[2],
+          timestamp: Number(data[3]),
+          deleted: data[4],
+        };
+      }).filter(Boolean);
+      
+      // Переворачиваем массив, чтобы новые секреты были в начале
       arr = arr.reverse();
-      let newSecrets: Secret[];
+      console.log('Processed secrets (fetchSecrets):', arr.length);
+      console.log('Final secrets array:', arr);
+      
       if (append) {
-        newSecrets = [...secrets, ...arr];
+        setSecrets(prevSecrets => {
+          const newSecrets = [...prevSecrets, ...arr];
+          return newSecrets;
+        });
       } else {
-        newSecrets = arr;
+        setSecrets(arr);
       }
-      setSecrets(newSecrets);
-      if (newPage === 1 && JSON.stringify(newSecrets.slice(0, PAGE_SIZE)) !== JSON.stringify(getCachedSecrets())) {
-        setCachedSecrets(newSecrets);
-      }
-      setFetchLoading(false);
       setPage(newPage);
+      
+      // Проверяем профиль пользователя
       if (address) {
-        const myNew = newSecrets.filter(s => s.author?.toLowerCase() === address.toLowerCase())
+        const myNew = arr.filter(s => s.author?.toLowerCase() === address.toLowerCase())
           .map(s => ({ id: s.id, likes: Number(s.likes) }));
         const myPrev = loadProfileState(address);
         const hasUpdate = myNew.some(
@@ -443,8 +419,10 @@ export default function App() {
         setHasNewProfile(hasUpdate);
       }
     } catch (e) {
-      setFetchLoading(false);
+      console.error('Error fetching secrets (fetchSecrets):', e);
       setInfo("Failed to load secrets");
+    } finally {
+      setFetchLoading(false);
     }
   }
 
@@ -456,10 +434,18 @@ export default function App() {
 
   // Интервал обновления
   useEffect(() => {
-    if (!address) return;
-    // Первоначальная загрузка
+    console.log('App mounted, fetching secrets...');
+    // Первоначальная загрузка секретов независимо от подключения кошелька
     fetchSecrets();
-  }, [address]);
+  }, []); // Пустой массив зависимостей
+
+  // Также добавляем загрузку при изменении адреса
+  useEffect(() => {
+    if (address) {
+      console.log('Address changed, fetching secrets...');
+      fetchSecrets();
+    }
+  }, [address]); // Только address в зависимостях
 
   useEffect(() => {
     if (address && secrets.length > 0) {
@@ -526,8 +512,7 @@ export default function App() {
       });
       setInfo("Your secret has been added!");
       setSecret("");
-      await fetchSecrets();
-      updateStats();
+      fetchSecrets();
     } catch (e: any) {
       setInfo(parseError(e));
     }
@@ -554,8 +539,7 @@ export default function App() {
         }],
       });
       setInfo("Liked!");
-      await fetchSecrets();
-      updateStats();
+      fetchSecrets();
     } catch (e: any) {
       setInfo(parseError(e));
     }
@@ -606,8 +590,7 @@ export default function App() {
         }],
       });
       setInfo("Secret deleted!");
-      await fetchSecrets();
-      updateStats();
+      fetchSecrets();
     } catch (e: any) {
       setInfo(parseError(e));
     }
@@ -627,23 +610,33 @@ export default function App() {
     info,
     isAdmin: address?.toLowerCase() === ADMIN_ADDRESS.toLowerCase(),
     deleteSecret,
-    secrets: visibleSecrets,
+    secrets: secrets,
     prevSecrets: secrets,
     submitSecret,
     likeSecret,
     cardStyle,
-    fetchNextPage: () => throttledFetchNextPage(fetchNextPage),
+    fetchNextPage: () => {
+      const now = Date.now();
+      if (now - lastFetchTime > THROTTLE_DELAY) {
+        lastFetchTime = now;
+        fetchSecrets();
+      }
+    },
     hasNextPage,
     isFetchingNextPage,
-    refetchSecrets: refetch,
+    refetchSecrets: fetchSecrets,
   };
 
   const profileTabProps = {
     address,
     mySecrets,
     cardStyle,
-    fetchSecrets,
+    fetchSecrets: fetchSecrets,
   };
+
+  useEffect(() => {
+    console.log('Секреты для отображения:', secrets);
+  }, [secrets]);
 
   return (
     <div className="app-container" style={{
@@ -676,7 +669,7 @@ export default function App() {
               address={address}
               totalLikesGiven={totalLikesGiven}
               totalPosts={totalPosts}
-              totalLikesReceived={totalLikesReceived}
+              totalLikesReceived={totalLikesReceivedForAchievements}
               streak={currentStreak}
             />
           )}
@@ -688,16 +681,6 @@ export default function App() {
         setActiveTab={setActiveTab}
         hasNewProfile={hasNewProfile}
       />
-      <div className="flex flex-col items-center w-full max-w-[420px] mx-auto px-4">
-        {!isConnected && (
-          <button
-            onClick={() => connect({ connector: connectors[0] })}
-            className="px-4 py-2 rounded-full bg-gradient-to-r from-[#21EF6E] to-[#FF2D55] text-white font-bold shadow-lg hover:opacity-90 transition-all duration-200"
-          >
-            Connect Wallet
-          </button>
-        )}
-      </div>
     </div>
   );
 }
