@@ -192,7 +192,6 @@ async function fetchSecretsPage({ pageParam = 1 }) {
     setCachedSecretsPage(pageParam, arr);
     return arr;
   } catch (error) {
-    console.error('Error fetching secrets:', error);
     // Возвращаем кэшированные данные в случае ошибки
     return getCachedSecretsPage(pageParam) || [];
   }
@@ -251,7 +250,6 @@ export default function App() {
 
   // Обновляем секреты при изменении данных
   useEffect(() => {
-    console.log('Secrets updated:', secrets.length, secrets);
     if (address && secrets.length > 0) {
       const myNewSecrets = secrets.filter(s => 
         s.author?.toLowerCase() === address.toLowerCase() && !s.deleted
@@ -311,25 +309,20 @@ export default function App() {
 
   // --- Fetch secrets & badge logic ---
   async function fetchSecrets(newPage = 1, append = false) {
-    console.log('Fetching secrets:', { newPage, append });
     setFetchLoading(true);
     setInfo(""); // Очищаем предыдущие сообщения об ошибках
     
     try {
       // Проверяем подключение к RPC
-      console.log('Checking RPC connection...');
       let blockNumber;
       try {
         blockNumber = await withFailover(client => client.getBlockNumber());
-        console.log('Current block number:', blockNumber);
       } catch (e) {
-        console.error('Error in getBlockNumber:', e);
         setInfo("Ошибка при подключении к RPC: " + (e?.message || e));
         setFetchLoading(false);
         return;
       }
       
-      console.log('Reading contract count...');
       let count;
       try {
         count = await withFailover(client => client.readContract({
@@ -337,46 +330,41 @@ export default function App() {
           abi: ABI,
           functionName: "getSecretsCount",
         }));
-        console.log('getSecretsCount result:', count);
       } catch (e) {
-        console.error('Error in getSecretsCount:', e);
         setInfo("Ошибка при получении количества секретов: " + (e?.message || e));
         setFetchLoading(false);
         return;
       }
       const total = Number(count);
-      console.log('Total secrets count (fetchSecrets):', total);
       
       if (total === 0) {
-        console.log('No secrets found');
         setSecrets([]);
         setFetchLoading(false);
         return;
       }
       
-      // Загружаем все секреты через multicall
-      console.log('Loading secrets from contract (multicall)...');
-      const calls = [];
-      for (let i = 0; i < total; i++) {
-        calls.push({
-          address: CONTRACT_ADDRESS,
-          abi: ABI,
-          functionName: "getSecret",
-          args: [BigInt(i)],
-        });
-      }
-      console.log('calls for multicall:', calls);
-      const multicallResult: any[] = await withFailover(client => client.multicall({ contracts: calls }) as any[]);
-      console.log('multicallResult:', multicallResult);
-      const secretsData = multicallResult.map((r, idx) => {
-        if (r.status === 'success') {
-          return r.result;
-        } else {
-          console.error(`Multicall error for secret #${idx}:`, r.error);
-          return null;
+      // --- Новый батчинг multicall ---
+      const batchSize = 4;
+      let secretsData: any[] = [];
+      for (let i = 0; i < total; i += batchSize) {
+        const batchCalls = [];
+        for (let j = i; j < Math.min(i + batchSize, total); j++) {
+          batchCalls.push({
+            address: CONTRACT_ADDRESS,
+            abi: ABI,
+            functionName: "getSecret",
+            args: [BigInt(j)],
+          });
         }
-      });
-      console.log('Raw secrets data:', secretsData);
+        const batchResult: any[] = await withFailover(client => client.multicall({ contracts: batchCalls }) as any[]);
+        secretsData.push(...batchResult.map((r, idx) => {
+          if (r.status === 'success') {
+            return r.result;
+          } else {
+            return null;
+          }
+        }));
+      }
       
       let arr: Secret[] = secretsData.map((data: any, idx) => {
         if (!data) return null;
@@ -392,10 +380,6 @@ export default function App() {
       
       // Переворачиваем массив, чтобы новые секреты были в начале
       arr = arr.reverse();
-      console.log('Processed secrets (fetchSecrets):', arr.length);
-      console.log('Final secrets array:', arr);
-      // Лог перед setSecrets
-      console.log('Секреты из контракта:', arr);
       setSecrets(arr);
       setPage(newPage);
       
@@ -413,7 +397,6 @@ export default function App() {
         setHasNewProfile(hasUpdate);
       }
     } catch (e) {
-      console.error('Error fetching secrets (fetchSecrets):', e);
       setInfo("Failed to load secrets");
     } finally {
       setFetchLoading(false);
@@ -428,7 +411,6 @@ export default function App() {
 
   // Интервал обновления
   useEffect(() => {
-    console.log('App mounted, fetching secrets...');
     // Первоначальная загрузка секретов независимо от подключения кошелька
     fetchSecrets();
   }, []); // Пустой массив зависимостей
@@ -436,7 +418,6 @@ export default function App() {
   // Также добавляем загрузку при изменении адреса
   useEffect(() => {
     if (address) {
-      console.log('Address changed, fetching secrets...');
       fetchSecrets();
     }
   }, [address]); // Только address в зависимостях
@@ -532,7 +513,6 @@ export default function App() {
           }),
         }],
       });
-      setInfo("Liked!");
       fetchSecrets();
     } catch (e: any) {
       setInfo(parseError(e));
@@ -559,7 +539,6 @@ export default function App() {
           }),
         }],
       });
-      setInfo("Super Like sent!");
       fetchSecrets();
     } catch (e: any) {
       setInfo(parseError(e));
@@ -583,7 +562,6 @@ export default function App() {
           }),
         }],
       });
-      setInfo("Secret deleted!");
       fetchSecrets();
     } catch (e: any) {
       setInfo(parseError(e));
@@ -627,10 +605,6 @@ export default function App() {
     cardStyle,
     fetchSecrets: fetchSecrets,
   };
-
-  useEffect(() => {
-    console.log('Секреты для отображения:', secrets);
-  }, [secrets]);
 
   return (
     <div className="app-container" style={{

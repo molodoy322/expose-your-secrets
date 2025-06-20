@@ -19,9 +19,6 @@ async function loadSDK(): Promise<void> {
   try {
     // Проверяем, доступен ли уже SDK
     if (window.sdk?.actions?.ready) {
-      console.log('Farcaster SDK already loaded');
-      await window.sdk.actions.ready();
-      sdkInitialized = true;
       return;
     }
 
@@ -31,39 +28,31 @@ async function loadSDK(): Promise<void> {
     script.async = true;
 
     script.onload = async () => {
-      console.log('Farcaster SDK script loaded');
       if (window.sdk?.actions?.ready) {
         await window.sdk.actions.ready();
         sdkInitialized = true;
       }
     };
 
-    script.onerror = (error) => {
-      console.error('Failed to load Farcaster SDK:', error);
+    script.onerror = () => {
       sdkLoading = false;
     };
 
     document.head.appendChild(script);
   } catch (error) {
-    console.error('Error in loadSDK:', error);
     sdkLoading = false;
   }
 }
 
 export async function initializeFarcaster() {
-  console.log('Initializing Farcaster SDK...');
-  console.log('Is in iframe:', window.self !== window.top);
-  
   try {
     await loadSDK();
   } catch (error) {
-    console.error('Failed to initialize Farcaster SDK:', error);
   }
 }
 
 export async function shareToFarcaster(text: string, imageUrl?: string) {
   if (!sdkInitialized) {
-    console.log('Farcaster SDK not initialized, attempting to initialize...');
     await initializeFarcaster();
   }
 
@@ -75,11 +64,9 @@ export async function shareToFarcaster(text: string, imageUrl?: string) {
       });
       return true;
     } else {
-      console.error('Farcaster SDK post method not available');
       return false;
     }
   } catch (error) {
-    console.error('Error sharing to Farcaster:', error);
     return false;
   }
 } 

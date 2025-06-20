@@ -3,12 +3,8 @@ import { base } from 'viem/chains'
 
 // Публичные RPC эндпоинты с CORS поддержкой
 const RPC_ENDPOINTS = [
-	'https://developer-access-mainnet.base.org',
-	'https://base-mainnet.public.blastapi.io',
-	'https://base.blockpi.network/v1/rpc/public',
-	'https://base.drpc.org',
-	'https://mainnet.base.org'
-].filter(Boolean);
+	'https://base-mainnet.infura.io/v3/9010eab5407747c68ac69b02ffee4255'
+];
 
 let currentRpcIndex = 0;
 
@@ -28,7 +24,6 @@ export async function withFailover(fn) {
 			return await fn(client);
 		} catch (e) {
 			lastError = e;
-			console.warn(`RPC endpoint failed, switching to next: ${RPC_ENDPOINTS[i]}`);
 		}
 	}
 	throw lastError;
@@ -50,7 +45,6 @@ export function getPublicClient() {
 					if (tries < RPC_ENDPOINTS.length) {
 						currentRpcIndex = (currentRpcIndex + 1) % RPC_ENDPOINTS.length;
 						client = createClientWithIndex(currentRpcIndex);
-						console.warn(`RPC endpoint failed, switching to next: ${RPC_ENDPOINTS[currentRpcIndex]}`);
 					}
 				}
 			}

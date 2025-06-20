@@ -21,8 +21,8 @@ const baseChain = {
     symbol: 'ETH',
   },
   rpcUrls: {
-    default: { http: ['https://mainnet.base.org'] },
-    public: { http: ['https://mainnet.base.org'] },
+    default: { http: ['https://base-mainnet.infura.io/v3/9010eab5407747c68ac69b02ffee4255'] },
+    public: { http: ['https://base-mainnet.infura.io/v3/9010eab5407747c68ac69b02ffee4255'] },
   },
   blockExplorers: {
     default: { name: 'Basescan', url: 'https://basescan.org' },
@@ -720,20 +720,22 @@ export default function AchievementsTab({
                           onClick={() => handleMintAchievement(achievement)}
                           disabled={isMinting}
                           style={{
-                            position: "absolute",
-                            bottom: 10,
-                            right: 10,
-                            background: isMinting ? "#666" : "#21EF6E",
+                            background: isMinting ? "#666" : "linear-gradient(90deg, #21EF6E, #FFD600)",
                             border: "none",
                             color: "#23243a",
                             cursor: isMinting ? "wait" : "pointer",
-                            fontSize: 14,
-                            padding: "8px 16px",
-                            borderRadius: 8,
+                            fontSize: 16,
+                            padding: "14px 28px",
+                            borderRadius: 16,
                             fontWeight: 700,
                             display: "flex",
                             alignItems: "center",
-                            gap: 8
+                            gap: 10,
+                            boxShadow: "0 4px 16px 0 rgba(33,239,110,0.15)",
+                            margin: "18px auto 0 auto",
+                            position: "relative",
+                            zIndex: 1,
+                            transition: "background 0.2s, color 0.2s"
                           }}
                         >
                           {isMinting ? (

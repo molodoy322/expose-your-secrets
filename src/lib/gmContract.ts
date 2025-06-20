@@ -530,7 +530,6 @@ export async function getGmUserStats(userAddress: string, chainId: number) {
 			isActive: stats[4]
 		};
 	} catch (error) {
-		console.error('Error fetching GM user stats:', error);
 		return {
 			currentStreak: BigInt(0),
 			totalCheckIns: BigInt(0),
@@ -550,7 +549,6 @@ export async function getGmCheckInPrice() {
 		}));
 		return price;
 	} catch (error) {
-		console.error('Error fetching check-in price:', error);
 		return BigInt(0); // Default to 0 if an error occurs
 	}
 }
@@ -564,7 +562,6 @@ export async function getGmCurrentTime() {
 		}));
 		return time;
 	} catch (error) {
-		console.error('Error fetching current time from GM contract:', error);
 		return BigInt(0); // Default to 0 if an error occurs
 	}
 }
@@ -578,7 +575,6 @@ export async function getGmCurrentDay() {
 		}));
 		return day;
 	} catch (error) {
-		console.error('Error fetching current day from GM contract:', error);
 		return BigInt(0); // Default to 0 if an error occurs
 	}
 }
