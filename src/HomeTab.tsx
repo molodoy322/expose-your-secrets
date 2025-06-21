@@ -495,7 +495,7 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
       {isConnected && (
         <div style={{
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent: "center",
           marginTop: "12px",
           padding: "12px",
           background: "rgba(34,36,58,0.66)",
@@ -510,15 +510,6 @@ const [, setUserStats] = React.useState<{secretsPosted: number, likesGiven: numb
           }}>
             <span style={{ fontSize: "14px", color: "#aaa" }}>Posts Today</span>
             <span style={{ fontSize: "18px", fontWeight: "700", color: "#21EF6E" }}>{postsToday}/5</span>
-          </div>
-          <div style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "4px"
-          }}>
-            <span style={{ fontSize: "14px", color: "#aaa" }}>Likes Today</span>
-            <span style={{ fontSize: "18px", fontWeight: "700", color: "#FFD600" }}>{likesToday}/10</span>
           </div>
         </div>
       )}

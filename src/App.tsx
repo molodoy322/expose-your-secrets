@@ -463,6 +463,10 @@ export default function App() {
     if (e?.message && (e.message.toLowerCase().includes("already liked") || e.message.toLowerCase().includes("like only once"))) {
       return "You have already liked this secret!";
     }
+    // Если ошибка связана с RPC (429 или любая с 'Ошибка при подключении к RPC'), не показываем её пользователю
+    if (e?.message && e.message.toLowerCase().includes("ошибка при подключении к rpc")) {
+      return "";
+    }
     return "Error! " + (e.message || "Unknown error.");
   }
 
